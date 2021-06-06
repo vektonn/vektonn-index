@@ -3,6 +3,7 @@ using System.Collections.Generic;
 namespace SpaceHosting.Index
 {
     internal class IndexIdMapping<TId> : IIndexIdMapping<TId>
+        where TId : notnull
     {
         private readonly Dictionary<TId, long> idToIndexId;
         private readonly Dictionary<long, TId> indexIdToId;

@@ -5,6 +5,7 @@ using Vostok.Logging.Abstractions;
 namespace SpaceHosting.Index
 {
     internal sealed class IndexStore<TId, TData, TVector> : IIndexStore<TId, TData, TVector>
+        where TId : notnull
         where TVector : IVector
     {
         private readonly ILog log;
@@ -50,11 +51,11 @@ namespace SpaceHosting.Index
 
             var dataPointsWithIndexIdsToRemove = dataPointsWithIndexIds
                 .Where(x => x.IndexId.HasValue && x.DataPoint.IsDeleted)
-                .Select(x => new {x.DataPoint, IndexId = x.IndexId.Value})
+                .Select(x => new {x.DataPoint, IndexId = x.IndexId!.Value})
                 .ToArray();
             var dataPointsWithIndexIdsToUpdate = dataPointsWithIndexIds
                 .Where(x => x.IndexId.HasValue && !x.DataPoint.IsDeleted)
-                .Select(x => new {x.DataPoint, IndexId = x.IndexId.Value})
+                .Select(x => new {x.DataPoint, IndexId = x.IndexId!.Value})
                 .ToArray();
             var dataPointsWithIndexIdsToSkip = dataPointsWithIndexIds
                 .Where(x => !x.IndexId.HasValue && x.DataPoint.IsDeleted)

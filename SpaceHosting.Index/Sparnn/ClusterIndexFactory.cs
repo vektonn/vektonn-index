@@ -12,7 +12,8 @@ namespace SpaceHosting.Index.Sparnn
             TRecord[] recordsData,
             MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int? desiredClusterSize,
-            IClusterIndex<TRecord> invoker)
+            IClusterIndex<TRecord>? invoker)
+            where TRecord : notnull
         {
             var recordsCount = recordsData.Length;
             var maxClusterSize = desiredClusterSize ?? Math.Max((int)Math.Sqrt(recordsCount), 1000);

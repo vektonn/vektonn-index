@@ -46,7 +46,7 @@ namespace SpaceHosting.Index.Tests.Sparnn.Helpers.ListExtensionsTests
                 new[] {34, 35},
             };
 
-            Assert.Throws<Exception>(() => new[] {matrix1, matrix2}.HStack().ToArray());
+            Assert.Throws<InvalidOperationException>(() => new[] {matrix1, matrix2}.HStack().ToArray());
         }
 
         [Test]

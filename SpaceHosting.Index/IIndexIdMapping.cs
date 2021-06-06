@@ -1,6 +1,7 @@
 namespace SpaceHosting.Index
 {
     internal interface IIndexIdMapping<TId>
+        where TId : notnull
     {
         int Count { get; }
         long? FindIndexIdById(TId id);

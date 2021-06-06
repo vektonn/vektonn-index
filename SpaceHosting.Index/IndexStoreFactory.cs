@@ -9,6 +9,7 @@ using Vostok.Logging.Abstractions;
 namespace SpaceHosting.Index
 {
     public class IndexStoreFactory<TId, TData> : IIndexStoreFactory<TId, TData>
+        where TId : notnull
     {
         private readonly Dictionary<string, (string, FaissMetricType)> faissSupportedAlgorithms = new()
         {

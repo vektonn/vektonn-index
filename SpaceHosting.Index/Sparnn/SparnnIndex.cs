@@ -12,7 +12,7 @@ namespace SpaceHosting.Index.Sparnn
         private readonly int indicesNumber;
         private readonly int clusterSize;
         private readonly int vectorDimension;
-        private IMultiClusterIndex<long> multiClusterIndex;
+        private IMultiClusterIndex<long>? multiClusterIndex;
 
         public SparnnIndex(MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory, int indicesNumber, int clusterSize, int vectorDimension)
         {
@@ -43,6 +43,9 @@ namespace SpaceHosting.Index.Sparnn
 
         public long DeleteBatch(long[] ids)
         {
+            if (multiClusterIndex is null)
+                return 0;
+
             multiClusterIndex.Delete(ids);
 
             VectorCount -= ids.Length;

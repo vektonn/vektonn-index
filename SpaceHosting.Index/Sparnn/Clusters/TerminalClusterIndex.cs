@@ -7,10 +7,11 @@ using SpaceHosting.Index.Sparnn.Helpers;
 namespace SpaceHosting.Index.Sparnn.Clusters
 {
     internal sealed class TerminalClusterIndex<TRecord> : BaseClusterIndex<TRecord>
+        where TRecord : notnull
     {
         private readonly MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
-        private MatrixMetricSearchSpace<TRecord> recordSpace;
-        private RecordsToIndexMap recordsToIndex;
+        private MatrixMetricSearchSpace<TRecord> recordSpace = null!;
+        private RecordsToIndexMap recordsToIndex = null!;
 
         public TerminalClusterIndex(
             IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors,
@@ -61,7 +62,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
             var indexesOfEntitiesToBeDeleted = recordsToIndex
                 .GetIndexes(recordsToBeDeleted)
                 .Where(i => i != null)
-                .Select(i => i.Value)
+                .Select(i => i!.Value)
                 .ToHashSet();
 
             if (indexesOfEntitiesToBeDeleted.Count == 0)

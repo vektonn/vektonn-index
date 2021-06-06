@@ -10,11 +10,13 @@ namespace SpaceHosting.Index.Tests
     public class IndexStoreTests
     {
         private const double singlePrecisionEpsilon = 1e-06;
-        private static readonly Random random = new Random();
-        private ILog log;
-        private IIndexIdMapping<int> idMapping;
-        private IIndexDataStorage<int, string> storage;
-        private IIndex<DenseVector> index;
+
+        private readonly Random random = new Random();
+
+        private ILog log = null!;
+        private IIndexIdMapping<int> idMapping = null!;
+        private IIndexDataStorage<int, string> storage = null!;
+        private IIndex<DenseVector> index = null!;
 
         [SetUp]
         public void SetUp()

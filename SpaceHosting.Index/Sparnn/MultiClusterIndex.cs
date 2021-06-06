@@ -9,6 +9,7 @@ using SpaceHosting.Index.Sparnn.Helpers;
 namespace SpaceHosting.Index.Sparnn
 {
     internal class MultiClusterIndex<TRecord> : IMultiClusterIndex<TRecord>
+        where TRecord : notnull
     {
         private readonly IClusterIndex<TRecord>[] indices;
 

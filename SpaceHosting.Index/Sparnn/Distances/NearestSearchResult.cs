@@ -15,7 +15,7 @@ namespace SpaceHosting.Index.Sparnn.Distances
         public TElement Element { get; }
         public MathNet.Numerics.LinearAlgebra.Double.SparseVector Vector { get; }
 
-        public int CompareTo(NearestSearchResult<TElement> other)
+        public int CompareTo(NearestSearchResult<TElement>? other)
         {
             if (ReferenceEquals(this, other))
                 return 0;

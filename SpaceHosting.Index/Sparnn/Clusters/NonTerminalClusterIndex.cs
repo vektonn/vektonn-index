@@ -9,9 +9,10 @@ using SpaceHosting.Index.Sparnn.Helpers;
 namespace SpaceHosting.Index.Sparnn.Clusters
 {
     internal sealed class NonTerminalClusterIndex<TRecord> : BaseClusterIndex<TRecord>
+        where TRecord : notnull
     {
         private readonly MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
-        private MatrixMetricSearchSpace<IClusterIndex<TRecord>> clusterSpace;
+        private MatrixMetricSearchSpace<IClusterIndex<TRecord>> clusterSpace = null!;
 
         public NonTerminalClusterIndex(
             IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors,

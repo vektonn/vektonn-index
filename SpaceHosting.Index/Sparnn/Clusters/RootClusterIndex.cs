@@ -5,9 +5,10 @@ using SpaceHosting.Index.Sparnn.Distances;
 namespace SpaceHosting.Index.Sparnn.Clusters
 {
     internal class RootClusterIndex<TRecord> : BaseClusterIndex<TRecord>
+        where TRecord : notnull
     {
         private readonly MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
-        private IClusterIndex<TRecord> root;
+        private IClusterIndex<TRecord> root = null!;
 
         public RootClusterIndex(
             IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors,

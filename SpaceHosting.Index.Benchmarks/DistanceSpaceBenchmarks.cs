@@ -19,9 +19,10 @@ namespace SpaceHosting.Index.Benchmarks
 
         private readonly int searchBatchSize = Math.Max((int)Math.Sqrt(VectorSpaceSize), 1000);
         private readonly int[] elements = Enumerable.Range(0, VectorSpaceSize).ToArray();
-        private JaccardBinaryDistanceSpace<int> jaccard;
-        private CosineDistanceSpace<int> cosine;
-        private IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> vectorsToSearch;
+
+        private JaccardBinaryDistanceSpace<int> jaccard = null!;
+        private CosineDistanceSpace<int> cosine = null!;
+        private IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> vectorsToSearch = null!;
 
         [GlobalSetup]
         public void Setup()

@@ -7,6 +7,7 @@ using SpaceHosting.Index.Sparnn.Distances;
 namespace SpaceHosting.Index.Sparnn.Clusters
 {
     internal abstract class BaseClusterIndex<TRecord> : IClusterIndex<TRecord>
+        where TRecord : notnull
     {
         protected readonly int desiredClusterSize;
         protected readonly int searchBatchSize;

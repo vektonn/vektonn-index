@@ -35,12 +35,12 @@ namespace SpaceHosting.Index.Sparnn.Helpers
             }
             finally
             {
-                Exception e = null;
+                Exception? e = null;
 
                 foreach (var enumerator in enumerators)
                 {
                     if (e is null && enumerator.MoveNext())
-                        e = new Exception("blocks have different rows count!");
+                        e = new InvalidOperationException("blocks have different rows count!");
 
                     enumerator.Dispose();
                 }
