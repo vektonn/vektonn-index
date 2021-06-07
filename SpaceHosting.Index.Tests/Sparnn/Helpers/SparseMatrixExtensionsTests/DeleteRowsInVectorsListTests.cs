@@ -5,7 +5,6 @@ using SpaceHosting.Index.Sparnn.Helpers;
 
 namespace SpaceHosting.Index.Tests.Sparnn.Helpers.SparseMatrixExtensionsTests
 {
-    [TestFixture]
     public class DeleteRowsInVectorsListTests
     {
         [TestCase(0, new double[] {1, 2}, Description = "Delete first row")]

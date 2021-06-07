@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using MathNet.Numerics.LinearAlgebra.Double;
@@ -8,7 +8,6 @@ using SpaceHosting.Index.Sparnn.Helpers;
 
 namespace SpaceHosting.Index.Tests.Sparnn.Distances
 {
-    [TestFixture]
     public class CosineDistanceSpaceTests
     {
         [TestCase(0)]

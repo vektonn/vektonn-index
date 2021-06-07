@@ -5,7 +5,6 @@ using SpaceHosting.Index.Sparnn.Helpers;
 
 namespace SpaceHosting.Index.Tests.Sparnn.Helpers.ListExtensionsTests
 {
-    [TestFixture]
     public class CreateMatrixTests
     {
         private readonly IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> vectors = new[]

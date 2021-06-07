@@ -4,7 +4,6 @@ using SpaceHosting.Index.Sparnn.Helpers;
 
 namespace SpaceHosting.Index.Tests.Sparnn.Helpers.ListExtensionsTests
 {
-    [TestFixture]
     public class TakeKBestTests
     {
         [TestCase(-1)]
