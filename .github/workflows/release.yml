@@ -1,0 +1,23 @@
+on:
+  push:
+    tags:
+    - 'v[0-9]+.[0-9]+-release*'
+    paths-ignore:
+    - '**.md'
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: Build
+      run: dotnet build --configuration Release
+    - name: Pack
+      run: dotnet pack --configuration Release --no-build --output ./nuget-packages ./SpaceHosting.Index/SpaceHosting.Index.csproj
+    - name: Test
+      run: dotnet test --configuration Release --no-build --verbosity normal --filter TestCategory!=RequiresNativeFaissLibrary
+    - name: Push
+      run: dotnet nuget push nuget-packages/*.nupkg --api-key ${{ secrets.NUGET_ORG_API_KEY }} --source https://api.nuget.org/v3/index.json
