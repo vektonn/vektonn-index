@@ -5,7 +5,6 @@ using SpaceHosting.Index.Sparnn.Distances;
 
 namespace SpaceHosting.Index.Tests.Sparnn.Distances
 {
-    [TestFixture]
     public class JaccardBinaryDistanceSpaceTests
     {
         [Test]
@@ -31,6 +30,39 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
                 {5.0 / 5.0, 2.0 / 3.0, 1.0 / 2.0, 0.0 / 2.0},
                 {2.0 / 4.0, 5.0 / 5.0, 2.0 / 3.0, 3.0 / 4.0},
                 {3.0 / 5.0, 2.0 / 4.0, 3.0 / 4.0, 2.0 / 4.0}
+            };
+
+            var jaccardDistanceSpace = CreateJaccardBinaryDistanceSpace(baseVectors);
+            var actualResults = jaccardDistanceSpace.SearchNearestAsync(CreateSparseVectors(searchVectors), baseVectors.Length).Result.ToArray();
+            Assert.AreEqual(actualResults.Length, expectedResults.GetLength(0));
+            for (var i = 0; i < actualResults.Length; i++)
+            {
+                Assert.AreEqual(actualResults[i].Length, expectedResults.GetLength(1));
+                foreach (var nearestSearchResult in actualResults[i])
+                {
+                    Assert.AreEqual(expectedResults[i, nearestSearchResult.Element], nearestSearchResult.Distance, 1e-6);
+                }
+            }
+        }
+
+        [Test]
+        public void OnlyZeroDistance_ShouldNotThrow()
+        {
+            var baseVectors = new[,]
+            {
+                {1.0, 0.0, 0.0, 0.0, 0.0},
+                {1.0, 0.0, 0.0, 0.0, 0.0},
+                {1.0, 0.0, 0.0, 0.0, 0.0},
+            };
+
+            var searchVectors = new[,]
+            {
+                {1.0, 0.0, 0.0, 0.0, 0.0}
+            };
+
+            var expectedResults = new[,]
+            {
+                {0.0 / 1.0, 0.0 / 1.0, 0.0 / 1.0}
             };
 
             var jaccardDistanceSpace = CreateJaccardBinaryDistanceSpace(baseVectors);

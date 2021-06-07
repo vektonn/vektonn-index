@@ -12,6 +12,7 @@ namespace SpaceHosting.Index.Sparnn.Distances
     internal abstract class MatrixMetricSearchSpace<TElement> : IMatrixMetricSearchSpace<TElement>
     {
         private readonly int searchBatchSize;
+        private readonly double[] zerosDistances;
 
         protected MatrixMetricSearchSpace(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, TElement[] elements, int searchBatchSize)
         {
@@ -21,6 +22,7 @@ namespace SpaceHosting.Index.Sparnn.Distances
             FeatureMatrix = new SparseVectorsList(featureVectors);
             Elements = elements;
             this.searchBatchSize = searchBatchSize;
+            zerosDistances = new double[elements.Length];
         }
 
         public SparseVectorsList FeatureMatrix { get; }
@@ -50,7 +52,7 @@ namespace SpaceHosting.Index.Sparnn.Distances
 
             return distanceMatrix.ToRowArrays()
                 .Select(
-                    distancesForVector => distancesForVector
+                    distancesForVector => (distancesForVector ?? zerosDistances)
                         .Select((d, i) => (Distance: d, Index: i))
                         .ToArray()
                         .TakeKBest(resultsNumber, x => x.Distance)
