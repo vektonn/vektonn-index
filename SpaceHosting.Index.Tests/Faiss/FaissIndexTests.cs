@@ -10,54 +10,19 @@ namespace SpaceHosting.Index.Tests.Faiss
     public class FaissIndexTests
     {
         // from https://en.wikipedia.org/wiki/Machine_epsilon
-        private const double halfPrecisionEpsilon = 1e-03;
-        private const double singlePrecisionEpsilon = 1e-06;
-        private static readonly Random random = new Random();
+        private const double HalfPrecisionEpsilon = 1e-03;
+        private const double SinglePrecisionEpsilon = 1e-06;
+
+        private readonly Random random = new Random();
 
         [Test]
+        [Repeat(1000)]
         public void FindNearest_AddRandomDataPointsAndSearch_FlatL2()
         {
-            for (var i = 0; i < 1000; i++)
-            {
-                var index = new FaissIndex("Flat", FaissMetricType.METRIC_L2, 2);
+            using var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, 2);
 
-                var firstIndexDataPoint = (Id: 1, Vector: CreateRandomVector(2));
-                var secondIndexDataPoint = (Id: 2, Vector: CreateRandomVector(2));
-                var indexDataPoints = new (long Id, DenseVector Vector)[]
-                {
-                    firstIndexDataPoint,
-                    secondIndexDataPoint,
-                };
-
-                index.AddBatch(indexDataPoints);
-
-                var queryDataPoints = indexDataPoints.Select(x => x.Vector).ToArray();
-
-                var foundDataPoints = index.FindNearest(queryDataPoints, 2).ToArray();
-
-                var firstQueryFoundDataPoints = foundDataPoints[0];
-                Assert.AreEqual(firstIndexDataPoint.Id, firstQueryFoundDataPoints[0].Id);
-                Assert.AreEqual(0.0, firstQueryFoundDataPoints[0].Distance, singlePrecisionEpsilon);
-                Assert.AreEqual(secondIndexDataPoint.Id, firstQueryFoundDataPoints[1].Id);
-                Assert.IsTrue(!0.0.Equals(firstQueryFoundDataPoints[1].Distance));
-
-                var secondQueryFoundDataPoints = foundDataPoints[1];
-                Assert.AreEqual(secondIndexDataPoint.Id, secondQueryFoundDataPoints[0].Id);
-                Assert.AreEqual(0.0, secondQueryFoundDataPoints[0].Distance, singlePrecisionEpsilon);
-                Assert.AreEqual(firstIndexDataPoint.Id, secondQueryFoundDataPoints[1].Id);
-                Assert.IsTrue(!0.0.Equals(secondQueryFoundDataPoints[1].Distance));
-
-                index.Dispose();
-            }
-        }
-
-        [Test]
-        public void FindNearest_AddStaticDataPoints_FlatL2()
-        {
-            var index = new FaissIndex("Flat", FaissMetricType.METRIC_L2, 2);
-
-            var firstIndexDataPoint = (Id: 1, Vector: CreateVector(1.0, 2.0));
-            var secondIndexDataPoint = (Id: 2, Vector: CreateVector(10.0, 20.0));
+            var firstIndexDataPoint = (Id: 1, Vector: RandomVector(2));
+            var secondIndexDataPoint = (Id: 2, Vector: RandomVector(2));
             var indexDataPoints = new (long Id, DenseVector Vector)[]
             {
                 firstIndexDataPoint,
@@ -66,28 +31,58 @@ namespace SpaceHosting.Index.Tests.Faiss
 
             index.AddBatch(indexDataPoints);
 
-            var queryDataPoint = CreateVector(2.0, 3.0);
-            var queryDataPoints = new[] {queryDataPoint};
+            var queryDataPoints = indexDataPoints.Select(x => x.Vector).ToArray();
 
-            var foundDataPoints = index.FindNearest(queryDataPoints, 2).ToArray();
+            var foundDataPoints = index.FindNearest(queryDataPoints, 2);
 
             var firstQueryFoundDataPoints = foundDataPoints[0];
             Assert.AreEqual(firstIndexDataPoint.Id, firstQueryFoundDataPoints[0].Id);
-            Assert.AreEqual(2.0, firstQueryFoundDataPoints[0].Distance, singlePrecisionEpsilon);
+            Assert.AreEqual(0.0, firstQueryFoundDataPoints[0].Distance, SinglePrecisionEpsilon);
             Assert.AreEqual(secondIndexDataPoint.Id, firstQueryFoundDataPoints[1].Id);
-            Assert.AreEqual(353.0, firstQueryFoundDataPoints[1].Distance, singlePrecisionEpsilon);
+            Assert.IsTrue(!0.0.Equals(firstQueryFoundDataPoints[1].Distance));
 
-            index.Dispose();
+            var secondQueryFoundDataPoints = foundDataPoints[1];
+            Assert.AreEqual(secondIndexDataPoint.Id, secondQueryFoundDataPoints[0].Id);
+            Assert.AreEqual(0.0, secondQueryFoundDataPoints[0].Distance, SinglePrecisionEpsilon);
+            Assert.AreEqual(firstIndexDataPoint.Id, secondQueryFoundDataPoints[1].Id);
+            Assert.IsTrue(!0.0.Equals(secondQueryFoundDataPoints[1].Distance));
+        }
+
+        [Test]
+        public void FindNearest_AddStaticDataPoints_FlatL2()
+        {
+            using var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, 2);
+
+            var firstIndexDataPoint = (Id: 1, Vector: Vector(1.0, 2.0));
+            var secondIndexDataPoint = (Id: 2, Vector: Vector(10.0, 20.0));
+            var indexDataPoints = new (long Id, DenseVector Vector)[]
+            {
+                firstIndexDataPoint,
+                secondIndexDataPoint,
+            };
+
+            index.AddBatch(indexDataPoints);
+
+            var queryDataPoint = Vector(2.0, 3.0);
+            var queryDataPoints = new[] {queryDataPoint};
+
+            var foundDataPoints = index.FindNearest(queryDataPoints, 2);
+
+            var firstQueryFoundDataPoints = foundDataPoints[0];
+            Assert.AreEqual(firstIndexDataPoint.Id, firstQueryFoundDataPoints[0].Id);
+            Assert.AreEqual(2.0, firstQueryFoundDataPoints[0].Distance, SinglePrecisionEpsilon);
+            Assert.AreEqual(secondIndexDataPoint.Id, firstQueryFoundDataPoints[1].Id);
+            Assert.AreEqual(353.0, firstQueryFoundDataPoints[1].Distance, SinglePrecisionEpsilon);
         }
 
         [Test]
         public void FindNearest_AddAndDeleteStaticDataPointsAndSearch_FlatL2()
         {
-            var index = new FaissIndex("Flat", FaissMetricType.METRIC_L2, 2);
+            using var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, 2);
 
-            var firstIndexDataPoint = (Id: 1, Vector: CreateVector(1.0, 2.0));
-            var secondIndexDataPoint = (Id: 2, Vector: CreateVector(10.0, 20.0));
-            var thirdIndexDataPoint = (Id: 2, Vector: CreateVector(11.0, 21.0));
+            var firstIndexDataPoint = (Id: 1, Vector: Vector(1.0, 2.0));
+            var secondIndexDataPoint = (Id: 2, Vector: Vector(10.0, 20.0));
+            var thirdIndexDataPoint = (Id: 2, Vector: Vector(11.0, 21.0));
             var indexDataPoints = new (long Id, DenseVector Vector)[]
             {
                 firstIndexDataPoint,
@@ -98,28 +93,26 @@ namespace SpaceHosting.Index.Tests.Faiss
             index.AddBatch(indexDataPoints);
             index.DeleteBatch(new long[] {firstIndexDataPoint.Id});
 
-            var queryDataPoint = CreateVector(2.0, 3.0);
+            var queryDataPoint = Vector(2.0, 3.0);
             var queryDataPoints = new[] {queryDataPoint};
 
-            var foundDataPoints = index.FindNearest(queryDataPoints, 2).ToArray();
+            var foundDataPoints = index.FindNearest(queryDataPoints, 2);
 
             var firstQueryFoundDataPoints = foundDataPoints[0];
             Assert.AreEqual(secondIndexDataPoint.Id, firstQueryFoundDataPoints[0].Id);
-            Assert.AreEqual(353.0, firstQueryFoundDataPoints[0].Distance, singlePrecisionEpsilon);
+            Assert.AreEqual(353.0, firstQueryFoundDataPoints[0].Distance, SinglePrecisionEpsilon);
             Assert.AreEqual(thirdIndexDataPoint.Id, firstQueryFoundDataPoints[1].Id);
-            Assert.AreEqual(405.0, firstQueryFoundDataPoints[1].Distance, singlePrecisionEpsilon);
-
-            index.Dispose();
+            Assert.AreEqual(405.0, firstQueryFoundDataPoints[1].Distance, SinglePrecisionEpsilon);
         }
 
         [Test]
         public void FindNearest_AddAndUpdateStaticDataPointsAndSearch_FlatL2()
         {
-            var index = new FaissIndex("Flat", FaissMetricType.METRIC_L2, 2);
+            using var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, 2);
 
-            var firstIndexDataPoint = (Id: 1, Vector: CreateVector(1.0, 2.0));
-            var secondIndexDataPoint = (Id: 2, Vector: CreateVector(10.0, 20.0));
-            var thirdIndexDataPoint = (Id: 3, Vector: CreateVector(11.0, 21.0));
+            var firstIndexDataPoint = (Id: 1, Vector: Vector(1.0, 2.0));
+            var secondIndexDataPoint = (Id: 2, Vector: Vector(10.0, 20.0));
+            var thirdIndexDataPoint = (Id: 3, Vector: Vector(11.0, 21.0));
             var indexDataPoints = new (long Id, DenseVector Vector)[]
             {
                 firstIndexDataPoint,
@@ -127,7 +120,7 @@ namespace SpaceHosting.Index.Tests.Faiss
                 thirdIndexDataPoint
             };
 
-            var firstIndexDataPointUpdate = (Id: 1, Vector: CreateVector(5.0, 6.0));
+            var firstIndexDataPointUpdate = (Id: 1, Vector: Vector(5.0, 6.0));
             var updateDataPoints = new (long Id, DenseVector Vector)[]
             {
                 firstIndexDataPointUpdate
@@ -137,43 +130,39 @@ namespace SpaceHosting.Index.Tests.Faiss
             index.DeleteBatch(new long[] {firstIndexDataPoint.Id});
             index.AddBatch(updateDataPoints);
 
-            var queryDataPoint = CreateVector(2.0, 3.0);
+            var queryDataPoint = Vector(2.0, 3.0);
             var queryDataPoints = new[] {queryDataPoint};
 
-            var foundDataPoints = index.FindNearest(queryDataPoints, 2).ToArray();
+            var foundDataPoints = index.FindNearest(queryDataPoints, 2);
 
             var firstFoundDataPoint = foundDataPoints[0][0];
             firstFoundDataPoint.Id.Should().Be(firstIndexDataPointUpdate.Id);
             firstFoundDataPoint.Vector.Should().BeEquivalentTo(firstIndexDataPointUpdate.Vector);
-            firstFoundDataPoint.Distance.Should().BeApproximately(18.0, singlePrecisionEpsilon);
+            firstFoundDataPoint.Distance.Should().BeApproximately(18.0, SinglePrecisionEpsilon);
 
             var secondFoundDataPoint = foundDataPoints[0][1];
             secondFoundDataPoint.Id.Should().Be(secondIndexDataPoint.Id);
             secondFoundDataPoint.Vector.Should().BeEquivalentTo(secondIndexDataPoint.Vector);
-            secondFoundDataPoint.Distance.Should().BeApproximately(353.0, singlePrecisionEpsilon);
-
-            index.Dispose();
+            secondFoundDataPoint.Distance.Should().BeApproximately(353.0, SinglePrecisionEpsilon);
         }
 
         [Test]
         public void FindNearest_InitEmptyDataPointsAndSearch_FlatL2()
         {
-            var index = new FaissIndex("Flat", FaissMetricType.METRIC_L2, 2);
+            using var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, 2);
 
-            var foundDataPoints = index.FindNearest(new[] {CreateVector(5.0, 6.0)}, 2).ToArray();
+            var foundDataPoints = index.FindNearest(new[] {Vector(5.0, 6.0)}, 2);
 
-            CollectionAssert.IsEmpty(foundDataPoints[0]);
-
-            index.Dispose();
+            foundDataPoints[0].Should().BeEmpty();
         }
 
         [Test]
         public void FindNearest_AddAndClearStaticDataPointsAndSearch_FlatL2()
         {
-            var index = new FaissIndex("Flat", FaissMetricType.METRIC_L2, 2);
+            using var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, 2);
 
-            var firstIndexDataPoint = (Id: 1, Vector: CreateVector(1.0, 2.0));
-            var secondIndexDataPoint = (Id: 2, Vector: CreateVector(10.0, 20.0));
+            var firstIndexDataPoint = (Id: 1, Vector: Vector(1.0, 2.0));
+            var secondIndexDataPoint = (Id: 2, Vector: Vector(10.0, 20.0));
             var indexDataPoints = new (long Id, DenseVector Vector)[]
             {
                 firstIndexDataPoint,
@@ -183,24 +172,19 @@ namespace SpaceHosting.Index.Tests.Faiss
             index.AddBatch(indexDataPoints);
             index.DeleteBatch(indexDataPoints.Select(x => x.Id).ToArray());
 
-            var foundDataPoints = index.FindNearest(new[] {CreateVector(5.0, 6.0)}, 2).ToArray();
+            var foundDataPoints = index.FindNearest(new[] {Vector(5.0, 6.0)}, 2);
 
-            CollectionAssert.IsEmpty(foundDataPoints[0]);
-
-            index.Dispose();
+            foundDataPoints[0].Should().BeEmpty();
         }
 
-        private DenseVector CreateRandomVector(int dimensionCount)
+        private DenseVector RandomVector(int dimensionCount)
         {
             var coordinates = Enumerable.Range(0, dimensionCount).Select(_ => random.NextDouble()).ToArray();
-            return CreateVector(coordinates);
+            return Vector(coordinates);
         }
 
-        private DenseVector CreateVector(params double[] coordinates)
+        private static DenseVector Vector(params double[] coordinates)
         {
-            if (coordinates is null)
-                throw new ArgumentNullException();
-
             return new DenseVector(coordinates);
         }
     }
