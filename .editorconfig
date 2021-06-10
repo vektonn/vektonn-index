@@ -11,3 +11,6 @@ max_line_length = off
 
 [*.{csproj,props,targets,config,json,yml,yaml}]
 indent_size = 2
+
+[*.{sh,dockerfile}]
+end_of_line = lf

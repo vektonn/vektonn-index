@@ -4,4 +4,4 @@ obj/
 *.csproj.user
 *.DotSettings.user
 *.received.*
-/lib-faiss-native/
+/lib-faiss-native/*.so*

@@ -9,6 +9,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpaceHosting.Index.Tests", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpaceHosting.Index.Benchmarks", "SpaceHosting.Index.Benchmarks\SpaceHosting.Index.Benchmarks.csproj", "{7A9464E5-6950-4DF9-9FBB-74CC05014297}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildScripts", "BuildScripts", "{244034F4-C886-49E6-9522-8F0E6F1720D1}"
+	ProjectSection(SolutionItems) = preProject
+		.build-faiss-debian.dockerfile = .build-faiss-debian.dockerfile
+		.build-faiss-debian.sh = .build-faiss-debian.sh
+		.rebuild-nuget-package.cmd = .rebuild-nuget-package.cmd
+		.run-all-tests.dockerfile = .run-all-tests.dockerfile
+		.run-all-tests.sh = .run-all-tests.sh
+		.run-unit-tests.cmd = .run-unit-tests.cmd
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

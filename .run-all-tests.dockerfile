@@ -5,6 +5,6 @@ COPY . .
 ENV LD_LIBRARY_PATH=/src/lib-faiss-native
 RUN dotnet test --configuration Release
 
-# runtime stage
+# final stage
 FROM build
-ENTRYPOINT ["dotnet", "--info"]
+CMD ["dotnet", "--info"]
