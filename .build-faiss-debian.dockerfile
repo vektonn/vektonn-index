@@ -16,9 +16,9 @@ RUN sudo apt-get update && \
 RUN wget -nv -O - https://github.com/Kitware/CMake/releases/download/v3.17.1/cmake-3.17.1-Linux-x86_64.tar.gz | \
     sudo tar xzf - --strip-components=1 -C /usr
 
-RUN git clone --depth 1 --branch v${FAISS_VERSION} https://github.com/facebookresearch/faiss.git faiss_src && \
+RUN sudo git clone --depth 1 --branch v${FAISS_VERSION} https://github.com/facebookresearch/faiss.git faiss_src && \
     pushd faiss_src && \
-    cmake -B build \
+    sudo cmake -B build \
         -DBUILD_SHARED_LIBS=ON \
         -DBUILD_TESTING=OFF \
         -DFAISS_ENABLE_GPU=OFF \
@@ -28,7 +28,7 @@ RUN git clone --depth 1 --branch v${FAISS_VERSION} https://github.com/facebookre
         -DFAISS_OPT_LEVEL=avx2 \
         -DBLA_VENDOR=Intel10_64_dyn \
         . && \
-    make -C build -j $(nproc) faiss_avx2 faiss_c && \
+    sudo make -C build -j $(nproc) faiss_avx2 faiss_c && \
     popd
 #######################################################################################################################
 

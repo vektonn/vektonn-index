@@ -2,12 +2,13 @@
 THIS_SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
 if [ $# -lt 1 ]; then
-    echo "Usage: .build-faiss-debian.sh faiss_version";
+    echo "Usage: .build-faiss-debian.sh faiss_version [docker_image_name]";
     exit 1;
 fi
 
 FAISS_VERSION=$1
-DOCKER_IMAGE_NAME_AND_TAG=space-hosting/faiss-lib:$FAISS_VERSION
+DOCKER_IMAGE_NAME=${2:-space-hosting/faiss-lib}
+DOCKER_IMAGE_NAME_AND_TAG=$DOCKER_IMAGE_NAME:$FAISS_VERSION
 
 echo "Building faiss-lib docker image: $DOCKER_IMAGE_NAME_AND_TAG"
 

@@ -1,0 +1,25 @@
+on:
+  push:
+    tags:
+    - 'faiss-v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  publish-faiss-lib-image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Build and tag docker image
+      run: |
+        FAISS_VERSION=${GITHUB_REF/refs\/tags\/faiss-v/}
+        DOCKER_IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/space-hosting/faiss-lib
+        ./.build-faiss-debian.sh $FAISS_VERSION $DOCKER_IMAGE_NAME
+        echo "DOCKER_IMAGE_NAME_AND_TAG=$DOCKER_IMAGE_NAME:$FAISS_VERSION" >> $GITHUB_ENV
+
+    - name: Log into registry
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io --username ${{ github.actor }} --password-stdin
+
+    - name: Push docker image to GitHub registry
+      run: docker image push $DOCKER_IMAGE_NAME_AND_TAG

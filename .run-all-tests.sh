@@ -16,5 +16,5 @@ docker image build \
     "$THIS_SCRIPT_DIR"
 
 # If you are on ububtu, you can just run:
-# export LD_LIBRARY_PATH=$THIS_SCRIPT_DIR/lib-faiss-native
+# LD_LIBRARY_PATH=$THIS_SCRIPT_DIR/lib-faiss-native
 # dotnet test --configuration Release
