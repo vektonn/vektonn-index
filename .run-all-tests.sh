@@ -6,7 +6,7 @@ FAISS_VERSION=1.7.1
 docker container run \
     --rm \
     --volume "$THIS_SCRIPT_DIR/lib-faiss-native:/host" \
-    "space-hosting/faiss-lib:$FAISS_VERSION" \
+    "ghcr.io/kontur-model-ops/space-hosting/faiss-lib:$FAISS_VERSION" \
     bash -c 'cp /lib-faiss-native/* /host/'
 
 docker image build \

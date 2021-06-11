@@ -1,3 +1,5 @@
+name: Publish faiss-lib docker image
+
 on:
   push:
     tags:
@@ -6,7 +8,7 @@ on:
 jobs:
   publish-faiss-lib-image:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
     - name: Checkout
       uses: actions/checkout@v2
