@@ -29,7 +29,7 @@ namespace SpaceHosting.Index
 
         public IndexStoreFactory(ILog log)
         {
-            this.log = log;
+            this.log = log.ForContext("SpaceHostingIndex");
         }
 
         [SuppressMessage("ReSharper", "PatternAlwaysOfType")]

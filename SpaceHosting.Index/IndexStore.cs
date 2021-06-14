@@ -71,7 +71,7 @@ namespace SpaceHosting.Index
                     })
                 .ToArray();
 
-            log.Info(
+            log.Debug(
                 $"Adding batch of {dataPoints.Length}: " +
                 $"{dataPointsWithIndexIds.Count} without duplicates, " +
                 $"{dataPointsWithIndexIdsToSkip.Length} to skip, " +
@@ -125,10 +125,10 @@ namespace SpaceHosting.Index
 
         public IReadOnlyList<IndexQueryResult<TId, TData, TVector>> FindNearest(IndexQueryDataPoint<TVector>[] queryDataPoints, int limitPerQuery)
         {
-            log.Info("Starting search in index");
+            log.Debug("Starting search in index");
             var queryVectors = queryDataPoints.Select(x => x.Vector).ToArray();
             var nearest = index.FindNearest(queryVectors, limitPerQuery);
-            log.Info("Finished search in index");
+            log.Debug("Finished search in index");
 
             var queryResults = nearest
                 .Select(
