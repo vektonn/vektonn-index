@@ -86,5 +86,7 @@ namespace SpaceHosting.Index.Sparnn.Helpers
             matrixStorage.ColumnIndices = columnIndices;
             return matrix;
         }
+        public static int[] NonZerosIndices(this MathNet.Numerics.LinearAlgebra.Double.SparseVector sparseVector) => sparseVector.Storage.EnumerateNonZeroIndexed().Select(x => x.Item1).ToArray();
+
     }
 }

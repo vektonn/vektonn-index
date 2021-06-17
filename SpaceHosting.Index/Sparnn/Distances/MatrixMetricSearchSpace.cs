@@ -29,7 +29,7 @@ namespace SpaceHosting.Index.Sparnn.Distances
 
         public IList<TElement> Elements { get; }
 
-        public async Task<IEnumerable<NearestSearchResult<TElement>[]>> SearchNearestAsync(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, int resultsNumber)
+        public virtual async Task<IEnumerable<NearestSearchResult<TElement>[]>> SearchNearestAsync(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, int resultsNumber)
         {
             var searchTasks = featureVectors
                 .Batch(searchBatchSize)
