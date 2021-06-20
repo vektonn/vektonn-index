@@ -18,6 +18,7 @@ namespace SpaceHosting.Index.Sparnn.Distances
             {
                 MatrixMetricSearchSpaceAlgorithm.Cosine => new CosineDistanceSpace<TElement>(featureVectors, elements, searchBatchSize),
                 MatrixMetricSearchSpaceAlgorithm.JaccardBinary => new JaccardBinaryDistanceSpace<TElement>(featureVectors, elements, searchBatchSize),
+                MatrixMetricSearchSpaceAlgorithm.JaccardBinarySingleFeatureOriented => new JaccardBinarySingleFeatureOrientedSpace<TElement>(featureVectors, elements, searchBatchSize),
                 _ => throw new InvalidOperationException($"Invalid {nameof(searchSpaceAlgorithm)}: {searchSpaceAlgorithm}")
             };
         }

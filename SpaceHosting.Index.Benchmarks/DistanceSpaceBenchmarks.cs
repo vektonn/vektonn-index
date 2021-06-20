@@ -15,29 +15,35 @@ namespace SpaceHosting.Index.Benchmarks
         private const int MaximumValuable = 15;
 
         [Params(100, 1000)]
-        public int featureVectorsCount;
+        public int FeatureVectorsCount;
 
         private readonly int searchBatchSize = Math.Max((int)Math.Sqrt(VectorSpaceSize), 1000);
         private readonly int[] elements = Enumerable.Range(0, VectorSpaceSize).ToArray();
 
-        private JaccardBinaryDistanceSpace<int> jaccard = null!;
-        private CosineDistanceSpace<int> cosine = null!;
+        private JaccardBinaryDistanceSpace<int> jaccardBinaryDistanceSpace = null!;
+        private CosineDistanceSpace<int> cosineDistanceSpace = null!;
+        private JaccardBinarySingleFeatureOrientedSpace<int> jaccardSingleFeatureOrientedSpace = null!;
         private IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> vectorsToSearch = null!;
 
         [GlobalSetup]
         public void Setup()
         {
             var baseVectors = GenerateVectors(42, VectorSpaceSize).ToList();
-            vectorsToSearch = GenerateVectors(420, featureVectorsCount).ToList();
-            jaccard = new JaccardBinaryDistanceSpace<int>(baseVectors, elements, searchBatchSize);
-            cosine = new CosineDistanceSpace<int>(baseVectors, elements, searchBatchSize);
+            vectorsToSearch = GenerateVectors(420, FeatureVectorsCount).ToList();
+            jaccardBinaryDistanceSpace = new JaccardBinaryDistanceSpace<int>(baseVectors, elements, searchBatchSize);
+            cosineDistanceSpace = new CosineDistanceSpace<int>(baseVectors, elements, searchBatchSize);
+            jaccardSingleFeatureOrientedSpace = new JaccardBinarySingleFeatureOrientedSpace<int>(baseVectors, elements, searchBatchSize);
         }
 
-        [Benchmark]
-        public void JaccardBinary() => jaccard.SearchNearestAsync(vectorsToSearch, 20).Result.Consume();
 
         [Benchmark]
-        public void Cosine() => cosine.SearchNearestAsync(vectorsToSearch, 20).Result.Consume();
+        public void JaccardBinarySingleFeatureOriented() => jaccardSingleFeatureOrientedSpace.SearchNearestAsync(vectorsToSearch, 20).GetAwaiter().GetResult().Consume();
+
+        [Benchmark]
+        public void JaccardBinary() => jaccardBinaryDistanceSpace.SearchNearestAsync(vectorsToSearch, 20).GetAwaiter().GetResult().Consume();
+
+        [Benchmark]
+        public void Cosine() => cosineDistanceSpace.SearchNearestAsync(vectorsToSearch, 20).GetAwaiter().GetResult().Consume();
 
         private IEnumerable<MathNet.Numerics.LinearAlgebra.Double.SparseVector> GenerateVectors(int seed, int count)
         {
@@ -51,7 +57,7 @@ namespace SpaceHosting.Index.Benchmarks
                     });
         }
 
-        private IEnumerable<Tuple<int, double>> GetIndexedValues(int count, Random rnd)
+        private static IEnumerable<Tuple<int, double>> GetIndexedValues(int count, Random rnd)
         {
             return Enumerable
                 .Range(0, VectorSize)

@@ -9,13 +9,13 @@ using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
 
 namespace SpaceHosting.Index.Sparnn.Distances
 {
-    internal class JaccardBinaryDistanceSpaceFast<TElement> : MatrixMetricSearchSpace<TElement>
+    internal class JaccardBinarySingleFeatureOrientedSpace<TElement> : MatrixMetricSearchSpace<TElement>
     {
         private readonly int[][] nonZerosIndexes;
         private readonly int vectorSize;
 
-        public JaccardBinaryDistanceSpaceFast(IList<MSparseVector> featureVectors, TElement[] elements, int searchBatchSize)
-            : base(featureVectors, elements, searchBatchSize)
+        public JaccardBinarySingleFeatureOrientedSpace(IList<MSparseVector> featureVectors, TElement[] elements, int searchBatchSize):
+            base(featureVectors, elements, searchBatchSize)
         {
             nonZerosIndexes = featureVectors.Select(x => x.NonZerosIndices()).ToArray();
             vectorSize = featureVectors.First().Count;
@@ -41,10 +41,8 @@ namespace SpaceHosting.Index.Sparnn.Distances
             return Task.FromResult(res);
         }
 
-        protected override Matrix<double> GetDistances(SparseMatrix featureMatrix)
-        {
+        protected override Matrix<double> GetDistances(SparseMatrix featureMatrix) =>
             throw new NotImplementedException();
-        }
 
         private static IEnumerable<List<(int, double)>> SearchNearestAsyncInternalAsync(int[][] featureVectors, int[][] searchSpace, int resultsNumber)
         {
