@@ -32,7 +32,7 @@ namespace SpaceHosting.Index.Benchmarks
             vectorsToSearch = GenerateVectors(420, FeatureVectorsCount).ToList();
             jaccardBinaryDistanceSpace = new JaccardBinaryDistanceSpace<int>(baseVectors, elements, searchBatchSize);
             cosineDistanceSpace = new CosineDistanceSpace<int>(baseVectors, elements, searchBatchSize);
-            jaccardSingleFeatureOrientedSpace = new JaccardBinarySingleFeatureOrientedSpace<int>(baseVectors, elements, searchBatchSize);
+            jaccardSingleFeatureOrientedSpace = new JaccardBinarySingleFeatureOrientedSpace<int>(baseVectors, elements);
         }
 
 
@@ -45,7 +45,7 @@ namespace SpaceHosting.Index.Benchmarks
         [Benchmark]
         public void Cosine() => cosineDistanceSpace.SearchNearestAsync(vectorsToSearch, 20).GetAwaiter().GetResult().Consume();
 
-        private IEnumerable<MathNet.Numerics.LinearAlgebra.Double.SparseVector> GenerateVectors(int seed, int count)
+        private static IEnumerable<MathNet.Numerics.LinearAlgebra.Double.SparseVector> GenerateVectors(int seed, int count)
         {
             var rnd = new Random(seed);
             return Enumerable.Range(0, count)

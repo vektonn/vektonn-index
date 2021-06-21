@@ -36,7 +36,7 @@ namespace SpaceHosting.Index.Sparnn.Helpers
                 {
                     temp.Insert(~index, pair);
                 }
-                else
+                else if (index < size)
                 {
                     temp.Insert(index, pair);
                 }

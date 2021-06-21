@@ -9,19 +9,23 @@ using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
 
 namespace SpaceHosting.Index.Sparnn.Distances
 {
-    internal class JaccardBinarySingleFeatureOrientedSpace<TElement> : MatrixMetricSearchSpace<TElement>
+    internal class JaccardBinarySingleFeatureOrientedSpace<TElement> : IMatrixMetricSearchSpace<TElement>
     {
         private readonly int[][] nonZerosIndexes;
         private readonly int vectorSize;
+        public SparseVectorsList FeatureMatrix { get; }
 
-        public JaccardBinarySingleFeatureOrientedSpace(IList<MSparseVector> featureVectors, TElement[] elements, int searchBatchSize):
-            base(featureVectors, elements, searchBatchSize)
+        public IList<TElement> Elements { get; }
+
+        public JaccardBinarySingleFeatureOrientedSpace(IList<MSparseVector> featureVectors, TElement[] elements)
         {
+            FeatureMatrix = new SparseVectorsList(featureVectors);
+            Elements = elements;
             nonZerosIndexes = featureVectors.Select(x => x.NonZerosIndices()).ToArray();
             vectorSize = featureVectors.First().Count;
         }
 
-        public override Task<IEnumerable<NearestSearchResult<TElement>[]>> SearchNearestAsync(IList<MSparseVector> featureVectors, int resultsNumber)
+        public Task<IEnumerable<NearestSearchResult<TElement>[]>> SearchNearestAsync(IList<MSparseVector> featureVectors, int resultsNumber)
         {
             var features = featureVectors.Select(x => x.NonZerosIndices()).ToArray();
 
@@ -40,10 +44,7 @@ namespace SpaceHosting.Index.Sparnn.Distances
 
             return Task.FromResult(res);
         }
-
-        protected override Matrix<double> GetDistances(SparseMatrix featureMatrix) =>
-            throw new NotImplementedException();
-
+        
         private static IEnumerable<List<(int, double)>> SearchNearestAsyncInternalAsync(int[][] featureVectors, int[][] searchSpace, int resultsNumber)
         {
             for (int i = 0; i < featureVectors.Length; i++)

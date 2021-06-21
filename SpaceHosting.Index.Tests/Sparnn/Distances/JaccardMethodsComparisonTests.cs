@@ -64,6 +64,8 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
         [TestCase(1)]
         [TestCase(10)]
         [TestCase(100)]
+        [TestCase(1000)]
+
         public void FindNearestReturnsSameResult(int kNearestCount)
         {
             double AccumulateNearestVectorResultDistanse(SparnnIndex sparnnIndex)
@@ -75,9 +77,9 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
 
             var firstMethodResultIds = AccumulateNearestVectorResultDistanse(jaccardBinaryIndex);
             var secondMethodResultIds = AccumulateNearestVectorResultDistanse(jaccardBinarySingleOrientedIndex);
-            secondMethodResultIds.Should().Be(firstMethodResultIds);
+            var diff = Math.Abs(firstMethodResultIds - secondMethodResultIds);
+            const double oneVectorMaxAbsoluteError = 1.0;
+            diff.Should().BeLessThan(oneVectorMaxAbsoluteError);
         }
-
- 
-}
+    }
 }

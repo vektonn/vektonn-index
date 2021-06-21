@@ -33,7 +33,7 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
             };
 
             var jaccardDistanceSpace = CreateJaccardBinaryDistanceSpace(baseVectors);
-            var actualResults = jaccardDistanceSpace.SearchNearestAsync(CreateSparseVectors(searchVectors), baseVectors.Length).Result.ToArray();
+            var actualResults = jaccardDistanceSpace.SearchNearestAsync(CreateSparseVectors(searchVectors), baseVectors.Length).GetAwaiter().GetResult().ToArray();
             Assert.AreEqual(actualResults.Length, expectedResults.GetLength(0));
             for (var i = 0; i < actualResults.Length; i++)
             {
@@ -66,7 +66,7 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
             };
 
             var jaccardDistanceSpace = CreateJaccardBinaryDistanceSpace(baseVectors);
-            var actualResults = jaccardDistanceSpace.SearchNearestAsync(CreateSparseVectors(searchVectors), baseVectors.Length).Result.ToArray();
+            var actualResults = jaccardDistanceSpace.SearchNearestAsync(CreateSparseVectors(searchVectors), baseVectors.Length).GetAwaiter().GetResult().ToArray();
             Assert.AreEqual(actualResults.Length, expectedResults.GetLength(0));
             for (var i = 0; i < actualResults.Length; i++)
             {
@@ -86,7 +86,7 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
                 .Range(0, vectorsCount)
                 .ToArray();
 
-            return new JaccardBinarySingleFeatureOrientedSpace<int>(baseVectors, indexes, vectorsCount);
+            return new JaccardBinarySingleFeatureOrientedSpace<int>(baseVectors, indexes);
         }
 
         private static IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> CreateSparseVectors(double[,] matrix)

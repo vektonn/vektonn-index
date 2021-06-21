@@ -10,7 +10,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
         where TRecord : notnull
     {
         private readonly MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
-        private MatrixMetricSearchSpace<TRecord> recordSpace = null!;
+        private IMatrixMetricSearchSpace<TRecord> recordSpace = null!;
         private RecordsToIndexMap recordsToIndex = null!;
 
         public TerminalClusterIndex(

@@ -12,7 +12,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
         where TRecord : notnull
     {
         private readonly MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
-        private MatrixMetricSearchSpace<IClusterIndex<TRecord>> clusterSpace = null!;
+        private IMatrixMetricSearchSpace<IClusterIndex<TRecord>> clusterSpace = null!;
 
         public NonTerminalClusterIndex(
             IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors,
