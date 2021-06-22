@@ -5,7 +5,7 @@ using MoreLinq;
 using SpaceHosting.Index.Sparnn.Clusters;
 using SpaceHosting.Index.Sparnn.Distances;
 using SpaceHosting.Index.Sparnn.Helpers;
-
+using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
 namespace SpaceHosting.Index.Sparnn
 {
     internal class MultiClusterIndex<TRecord> : IMultiClusterIndex<TRecord>
@@ -14,7 +14,7 @@ namespace SpaceHosting.Index.Sparnn
         private readonly IClusterIndex<TRecord>[] indices;
 
         public MultiClusterIndex(
-            IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors,
+            IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
             MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int? desiredClusterSize,
@@ -26,7 +26,7 @@ namespace SpaceHosting.Index.Sparnn
         }
 
         public IEnumerable<NearestSearchResult<TRecord>[]> Search(
-            IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors,
+            IList<MSparseVector> featureVectors,
             int resultsNumber,
             int clustersToSearchNumber,
             int? indicesToSearchNumberInput = null)
@@ -50,7 +50,7 @@ namespace SpaceHosting.Index.Sparnn
             }
         }
 
-        public void Insert(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, TRecord[] recordsData)
+        public void Insert(IList<MSparseVector> featureVectors, TRecord[] recordsData)
         {
             var insertionTasks = indices
                 .Select(index => index.InsertAsync(featureVectors, recordsData))

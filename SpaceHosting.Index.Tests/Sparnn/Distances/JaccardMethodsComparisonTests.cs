@@ -78,7 +78,7 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
             var firstMethodResultIds = AccumulateNearestVectorResultDistanse(jaccardBinaryIndex);
             var secondMethodResultIds = AccumulateNearestVectorResultDistanse(jaccardBinarySingleOrientedIndex);
             var diff = Math.Abs(firstMethodResultIds - secondMethodResultIds);
-            const double oneVectorMaxAbsoluteError = 1.0;
+            const double oneVectorMaxAbsoluteError = 0.001;
             diff.Should().BeLessThan(oneVectorMaxAbsoluteError);
         }
     }

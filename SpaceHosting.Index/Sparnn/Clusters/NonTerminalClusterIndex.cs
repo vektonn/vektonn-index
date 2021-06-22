@@ -14,6 +14,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
     {
         private readonly MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
         private IMatrixMetricSearchSpace<IClusterIndex<TRecord>> clusterSpace = null!;
+        private Random random => new Random(42);
 
         public NonTerminalClusterIndex(
             IList<MSparseVector> featureVectors,
@@ -111,7 +112,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
 
             async Task<IList<NearestSearchResult<TRecord>>> EnrichAsync(MSparseVector requestedVector, IList<NearestSearchResult<TRecord>> foundDataPoints, IEnumerable<IClusterIndex<TRecord>> remainedClusters)
             {
-                IList<NearestSearchResult<TRecord>> remainedDataPoints = new NearestSearchResult<TRecord>[0];
+                IList<NearestSearchResult<TRecord>> remainedDataPoints = Array.Empty<NearestSearchResult<TRecord>>();
                 if (foundDataPoints.Count < resultsNumber)
                 {
                     remainedDataPoints = await SearchVectorInClustersAsync(requestedVector, remainedClusters, resultsNumber - foundDataPoints.Count, clustersSearchNumber).ConfigureAwait(false);
@@ -125,7 +126,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
         {
             var clusterSize = Math.Min(desiredClusterSize, recordsData.Length);
             var clusterNumbers = Enumerable.Range(0, clusterSize).ToArray();
-            var clusterSelectionVectors = featureVectors.RandomSubset(clusterSize).ToArray();
+            var clusterSelectionVectors = featureVectors.RandomSubset(clusterSize, random).ToArray();
 
             var tempCosineDistanceSpace = matrixMetricSearchSpaceFactory.Create(clusterSelectionVectors, clusterNumbers, searchBatchSize);
 
