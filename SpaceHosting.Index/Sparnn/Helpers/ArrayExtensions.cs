@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SpaceHosting.Index.Sparnn.Helpers
 {
-    public static class ArrayExtensions
+    internal static class ArrayExtensions
     {
         private class PairComparer : IComparer<(int, double)>
         {
