@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MoreLinq;
 using SpaceHosting.Index.Sparnn.Distances;
 using SpaceHosting.Index.Sparnn.Helpers;
+using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
 
 namespace SpaceHosting.Index.Sparnn.Clusters
 {
@@ -15,7 +16,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
         private IMatrixMetricSearchSpace<IClusterIndex<TRecord>> clusterSpace = null!;
 
         public NonTerminalClusterIndex(
-            IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors,
+            IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
             MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int desiredClusterSize)
@@ -27,7 +28,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
 
         public override bool IsOverflowed => clusterSpace.Elements.Count > desiredClusterSize * 5;
 
-        public override async Task InsertAsync(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, TRecord[] records)
+        public override async Task InsertAsync(IList<MSparseVector> featureVectors, TRecord[] records)
         {
             if (clusterSpace.Elements.Any(c => c.IsOverflowed))
             {
@@ -44,9 +45,9 @@ namespace SpaceHosting.Index.Sparnn.Clusters
             await Task.WhenAll(insertTasks).ConfigureAwait(false);
         }
 
-        public override (IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, IList<TRecord> records) GetChildData()
+        public override (IList<MSparseVector> featureVectors, IList<TRecord> records) GetChildData()
         {
-            var resultFeatureMatrices = new List<MathNet.Numerics.LinearAlgebra.Double.SparseVector>();
+            var resultFeatureMatrices = new List<MSparseVector>();
             var resultRecordArrays = new List<TRecord>();
 
             foreach (var cluster in clusterSpace.Elements)
@@ -59,16 +60,16 @@ namespace SpaceHosting.Index.Sparnn.Clusters
             return (resultFeatureMatrices, resultRecordArrays);
         }
 
-        public override async Task DeleteAsync(IList<TRecord> recordsToBeDeleted)
+        public override Task DeleteAsync(IList<TRecord> recordsToBeDeleted)
         {
             var deleteTasks = clusterSpace.Elements
                 .Select(c => c.DeleteAsync(recordsToBeDeleted))
                 .ToArray();
 
-            await Task.WhenAll(deleteTasks).ConfigureAwait(false);
+            return Task.WhenAll(deleteTasks);
         }
 
-        protected override async Task<IEnumerable<NearestSearchResult<TRecord>[]>> SearchInternalAsync(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, int resultsNumber, int clustersSearchNumber)
+        protected override async Task<IEnumerable<NearestSearchResult<TRecord>[]>> SearchInternalAsync(IList<MSparseVector> featureVectors, int resultsNumber, int clustersSearchNumber)
         {
             var nearestClustersToVectors = (await clusterSpace.SearchNearestAsync(featureVectors, clusterSpace.Elements.Count).ConfigureAwait(false))
                 .Select(searchResults => searchResults.Select(result => result.Element))
@@ -108,7 +109,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
             return (await Task.WhenAll(enrichTasks).ConfigureAwait(false))
                 .Select(x => x.TakeKBest(resultsNumber, r => r.Distance));
 
-            async Task<IList<NearestSearchResult<TRecord>>> EnrichAsync(MathNet.Numerics.LinearAlgebra.Double.SparseVector requestedVector, IList<NearestSearchResult<TRecord>> foundDataPoints, IEnumerable<IClusterIndex<TRecord>> remainedClusters)
+            async Task<IList<NearestSearchResult<TRecord>>> EnrichAsync(MSparseVector requestedVector, IList<NearestSearchResult<TRecord>> foundDataPoints, IEnumerable<IClusterIndex<TRecord>> remainedClusters)
             {
                 IList<NearestSearchResult<TRecord>> remainedDataPoints = new NearestSearchResult<TRecord>[0];
                 if (foundDataPoints.Count < resultsNumber)
@@ -120,7 +121,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
             }
         }
 
-        protected override void Init(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, TRecord[] recordsData)
+        protected override void Init(IList<MSparseVector> featureVectors, TRecord[] recordsData)
         {
             var clusterSize = Math.Min(desiredClusterSize, recordsData.Length);
             var clusterNumbers = Enumerable.Range(0, clusterSize).ToArray();
@@ -139,7 +140,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
             clusterSpace = matrixMetricSearchSpaceFactory.Create(childClusterLeaderVectors, childClusters.ToArray(), searchBatchSize);
         }
 
-        private async Task<IList<NearestSearchResult<TRecord>>> SearchVectorInClustersAsync(MathNet.Numerics.LinearAlgebra.Double.SparseVector vector, IEnumerable<IClusterIndex<TRecord>> clusters, int resultsNumber, int clustersSearchNumber)
+        private static async Task<IList<NearestSearchResult<TRecord>>> SearchVectorInClustersAsync(MSparseVector vector, IEnumerable<IClusterIndex<TRecord>> clusters, int resultsNumber, int clustersSearchNumber)
         {
             var currentResultsToReturn = new List<NearestSearchResult<TRecord>>();
             foreach (var cluster in clusters)
@@ -156,7 +157,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
             return currentResultsToReturn;
         }
 
-        private static async Task<IEnumerable<(T NearestCluster, MathNet.Numerics.LinearAlgebra.Double.SparseVector[] FeatureVectors, TRecord[] Records)>> DivideOnClustersAsync<T>(IMatrixMetricSearchSpace<T> space, IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, TRecord[] recordsData)
+        private static async Task<IEnumerable<(T NearestCluster, MSparseVector[] FeatureVectors, TRecord[] Records)>> DivideOnClustersAsync<T>(IMatrixMetricSearchSpace<T> space, IList<MSparseVector> featureVectors, TRecord[] recordsData)
         {
             var nearestClusters = await space.SearchNearestAsync(featureVectors, 1).ConfigureAwait(false);
 

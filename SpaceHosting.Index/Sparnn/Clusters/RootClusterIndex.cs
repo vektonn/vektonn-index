@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SpaceHosting.Index.Sparnn.Distances;
-
+using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
 namespace SpaceHosting.Index.Sparnn.Clusters
 {
     internal class RootClusterIndex<TRecord> : BaseClusterIndex<TRecord>
@@ -11,7 +11,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
         private IClusterIndex<TRecord> root = null!;
 
         public RootClusterIndex(
-            IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors,
+            IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
             MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int desiredClusterSize)
@@ -23,7 +23,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
 
         public override bool IsOverflowed => false;
 
-        public override async Task InsertAsync(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, TRecord[] records)
+        public override async Task InsertAsync(IList<MSparseVector> featureVectors, TRecord[] records)
         {
             if (!root.IsOverflowed)
             {
@@ -34,7 +34,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
             Reindex(featureVectors, records);
         }
 
-        public override (IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, IList<TRecord> records) GetChildData()
+        public override (IList<MSparseVector> featureVectors, IList<TRecord> records) GetChildData()
         {
             return root.GetChildData();
         }
@@ -44,12 +44,12 @@ namespace SpaceHosting.Index.Sparnn.Clusters
             return root.DeleteAsync(recordsToBeDeleted);
         }
 
-        protected override Task<IEnumerable<NearestSearchResult<TRecord>[]>> SearchInternalAsync(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, int resultsNumber, int clustersSearchNumber)
+        protected override Task<IEnumerable<NearestSearchResult<TRecord>[]>> SearchInternalAsync(IList<MSparseVector> featureVectors, int resultsNumber, int clustersSearchNumber)
         {
             return root.SearchAsync(featureVectors, resultsNumber, clustersSearchNumber);
         }
 
-        protected override void Init(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, TRecord[] recordsData)
+        protected override void Init(IList<MSparseVector> featureVectors, TRecord[] recordsData)
         {
             root = ClusterIndexFactory.Create(featureVectors, recordsData, matrixMetricSearchSpaceFactory, desiredClusterSize, this);
         }
