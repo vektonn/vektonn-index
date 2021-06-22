@@ -49,13 +49,13 @@ namespace SpaceHosting.Index.Tests.Faiss
 
             using var index = NewFaissIndex(scatteredVectors);
 
-            foreach (var (id, vector) in scatteredVectors)
+            foreach (var (scatteredVectorId, vector) in scatteredVectors)
             {
-                var (l, distance, denseVector) = index.FindNearest(new[] {vector}, limitPerQuery: 1).Single().Single();
+                var (nearestVectorId, distance, denseVector) = index.FindNearest(new[] {vector}, limitPerQuery: 1).Single().Single();
 
                 L2(denseVector, vector).Should().Be(0.0);
                 distance.Should().Be(0.0);
-                l.Should().Be(id);
+                nearestVectorId.Should().Be(scatteredVectorId);
                 denseVector.Should().BeEquivalentTo(vector);
             }
         }
