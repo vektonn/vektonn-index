@@ -49,9 +49,8 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
             Random = new Random(42);
             jaccardBinaryIndex = new SparnnIndex(new MatrixMetricSearchSpaceFactory(MatrixMetricSearchSpaceAlgorithm.JaccardBinary), indicesNumber, clusterSize, VectorSize);
             jaccardBinarySingleOrientedIndex = new SparnnIndex(new MatrixMetricSearchSpaceFactory(MatrixMetricSearchSpaceAlgorithm.JaccardBinarySingleFeatureOriented), indicesNumber, clusterSize, VectorSize);
-            
-            var baseVectors = GenerateVectors(VectorSpaceSize).Select(x => ((long)Random.Next(), x));
 
+            var baseVectors = GenerateVectors(VectorSpaceSize).Select((x, i) => ((long)i, x));
             foreach (var batch in baseVectors.Batch(size: 1000, b => b.ToArray()))
             {
                 jaccardBinaryIndex.AddBatch(batch);
@@ -75,11 +74,9 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
                 return searchResult[0].Select(x => x.Distance).Sum();
             }
 
-            var firstMethodResultIds = AccumulateNearestVectorResultDistanse(jaccardBinaryIndex);
-            var secondMethodResultIds = AccumulateNearestVectorResultDistanse(jaccardBinarySingleOrientedIndex);
-            var diff = Math.Abs(firstMethodResultIds - secondMethodResultIds);
-            const double oneVectorMaxAbsoluteError = 0.001;
-            diff.Should().BeLessThan(oneVectorMaxAbsoluteError);
+            var firstMethodAccumulatedError = AccumulateNearestVectorResultDistanse(jaccardBinaryIndex);
+            var secondMethodAccumulatedError = AccumulateNearestVectorResultDistanse(jaccardBinarySingleOrientedIndex);
+            (firstMethodAccumulatedError - secondMethodAccumulatedError).Should().BeLessThan(double.Epsilon);
         }
     }
 }

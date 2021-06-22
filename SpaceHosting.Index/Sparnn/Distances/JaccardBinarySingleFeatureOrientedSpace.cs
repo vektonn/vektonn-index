@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MathNet.Numerics.LinearAlgebra;
-using MathNet.Numerics.LinearAlgebra.Double;
 using SpaceHosting.Index.Sparnn.Helpers;
 using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
 
