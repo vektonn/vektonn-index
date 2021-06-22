@@ -14,8 +14,11 @@ namespace SpaceHosting.Index.Benchmarks
         private const int MinimumValuable = 5;
         private const int MaximumValuable = 15;
 
-        [Params(100, 1000)]
+        [Params(1, 10, 100)]
         public int FeatureVectorsCount;
+
+        [Params(1, 10, 50)]
+        public int KnnCount;
 
         private readonly int searchBatchSize = Math.Max((int)Math.Sqrt(VectorSpaceSize), 1000);
         private readonly int[] elements = Enumerable.Range(0, VectorSpaceSize).ToArray();
@@ -37,13 +40,13 @@ namespace SpaceHosting.Index.Benchmarks
 
 
         [Benchmark]
-        public void JaccardBinarySingleFeatureOriented() => jaccardSingleFeatureOrientedSpace.SearchNearestAsync(vectorsToSearch, 20).GetAwaiter().GetResult().Consume();
+        public void JaccardBinarySingleFeatureOriented() => jaccardSingleFeatureOrientedSpace.SearchNearestAsync(vectorsToSearch, KnnCount).GetAwaiter().GetResult().Consume();
 
         [Benchmark]
-        public void JaccardBinary() => jaccardBinaryDistanceSpace.SearchNearestAsync(vectorsToSearch, 20).GetAwaiter().GetResult().Consume();
+        public void JaccardBinary() => jaccardBinaryDistanceSpace.SearchNearestAsync(vectorsToSearch, KnnCount).GetAwaiter().GetResult().Consume();
 
         [Benchmark]
-        public void Cosine() => cosineDistanceSpace.SearchNearestAsync(vectorsToSearch, 20).GetAwaiter().GetResult().Consume();
+        public void Cosine() => cosineDistanceSpace.SearchNearestAsync(vectorsToSearch, KnnCount).GetAwaiter().GetResult().Consume();
 
         private static IEnumerable<MathNet.Numerics.LinearAlgebra.Double.SparseVector> GenerateVectors(int seed, int count)
         {
@@ -53,16 +56,16 @@ namespace SpaceHosting.Index.Benchmarks
                     _ =>
                     {
                         var valuableCount = rnd.Next(MinimumValuable, MaximumValuable);
-                        return MathNet.Numerics.LinearAlgebra.Double.SparseVector.OfIndexedEnumerable(VectorSize, GetIndexedValues(valuableCount, rnd));
+                        return MathNet.Numerics.LinearAlgebra.Double.SparseVector.OfIndexedEnumerable(VectorSize, GetIndexedValues(valuableCount));
                     });
         }
 
-        private static IEnumerable<Tuple<int, double>> GetIndexedValues(int count, Random rnd)
+        private static IEnumerable<Tuple<int, double>> GetIndexedValues(int count)
         {
             return Enumerable
                 .Range(0, VectorSize)
                 .RandomSubset(count)
-                .Select(i => new Tuple<int, double>(i, rnd.NextDouble()));
+                .Select(i => new Tuple<int, double>(i, 1.0));
         }
     }
 }
