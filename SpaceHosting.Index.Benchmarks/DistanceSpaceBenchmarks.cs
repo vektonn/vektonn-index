@@ -7,6 +7,7 @@ using SpaceHosting.Index.Sparnn.Distances;
 
 namespace SpaceHosting.Index.Benchmarks
 {
+    [AllStatisticsColumn]
     public class DistanceSpaceBenchmarks
     {
         private const int VectorSpaceSize = 15_000;
