@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using SpaceHosting.Index.Sparnn.Clusters;
 using SpaceHosting.Index.Sparnn.Distances;
 
+using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
 namespace SpaceHosting.Index.Sparnn
 {
     internal static class ClusterIndexFactory
     {
         public static IClusterIndex<TRecord> Create<TRecord>(
-            IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors,
+            IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
             MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int? desiredClusterSize,

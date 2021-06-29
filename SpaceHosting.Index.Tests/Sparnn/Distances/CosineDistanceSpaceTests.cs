@@ -5,6 +5,7 @@ using MathNet.Numerics.LinearAlgebra.Double;
 using NUnit.Framework;
 using SpaceHosting.Index.Sparnn.Distances;
 using SpaceHosting.Index.Sparnn.Helpers;
+using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
 
 namespace SpaceHosting.Index.Tests.Sparnn.Distances
 {
@@ -94,23 +95,23 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
             Assert.That(actualNearestVectors, Is.EqualTo(new[] {featureVectors[2], featureVectors[3]}));
         }
 
-        private IMatrixMetricSearchSpace<T> CreateSpace<T>(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, T[] records)
+        private static IMatrixMetricSearchSpace<T> CreateSpace<T>(IList<MSparseVector> featureVectors, T[] records)
         {
             return new CosineDistanceSpace<T>(featureVectors, records, 1);
         }
 
-        private IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> CreateRandomVectors(int rows, int columns)
+        private static IList<MSparseVector> CreateRandomVectors(int rows, int columns)
         {
             var random = new Random();
             return SparseMatrix.Create(rows, columns, (i, j) => random.NextDouble()).EnumerateVectors().ToArray();
         }
 
-        private int[] CreateRandomRecords(int count)
+        private static int[] CreateRandomRecords(int count)
         {
             var random = new Random();
             return Enumerable.Range(0, count).Select(_ => random.Next()).ToArray();
         }
 
-        private IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> ToVectors(double[][] rowsArray) => rowsArray.Select(MathNet.Numerics.LinearAlgebra.Double.SparseVector.OfEnumerable).ToArray();
+        private IList<MSparseVector> ToVectors(double[][] rowsArray) => rowsArray.Select(MSparseVector.OfEnumerable).ToArray();
     }
 }
