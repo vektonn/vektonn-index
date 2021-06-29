@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Columns;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
+using BenchmarkDotNet.Reports;
 using MoreLinq;
+using Perfolizer.Horology;
 using SpaceHosting.Index.Sparnn;
 using Vostok.Logging.Abstractions;
 
@@ -23,10 +27,10 @@ namespace SpaceHosting.Index.Benchmarks
         [Params("Cosine", "JaccardBinary")]
         public string IndexMetric = null!;
 
-        [Params(1, 10, 100)]
+        [Params(1, 10, 100, 500)]
         public int QueryVectorsCount;
 
-        [Params(10, 100, 500)]
+        [Params(10, 100)]
         public int K;
 
         private readonly Random deterministicRandom = new Random(Seed: 42);
@@ -97,6 +101,8 @@ namespace SpaceHosting.Index.Benchmarks
 
             public JobsConfig()
             {
+                SummaryStyle = new SummaryStyle(CultureInfo.InvariantCulture, printUnitsInHeader: false, SizeUnit.MB, TimeUnit.Millisecond);
+
                 AddJob(baseline: true);
                 AddJob(baseline: false);
             }
