@@ -11,7 +11,7 @@ namespace SpaceHosting.Index.Sparnn
         public static IClusterIndex<TRecord> Create<TRecord>(
             IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
-            MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
+            IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int? desiredClusterSize,
             IClusterIndex<TRecord>? invoker)
             where TRecord : notnull

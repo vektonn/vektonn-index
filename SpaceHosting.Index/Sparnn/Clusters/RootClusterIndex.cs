@@ -7,13 +7,13 @@ namespace SpaceHosting.Index.Sparnn.Clusters
     internal class RootClusterIndex<TRecord> : BaseClusterIndex<TRecord>
         where TRecord : notnull
     {
-        private readonly MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
+        private readonly IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
         private IClusterIndex<TRecord> root = null!;
 
         public RootClusterIndex(
             IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
-            MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
+            IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int desiredClusterSize)
             : base(desiredClusterSize)
         {

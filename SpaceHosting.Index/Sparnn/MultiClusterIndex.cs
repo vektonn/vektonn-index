@@ -16,7 +16,7 @@ namespace SpaceHosting.Index.Sparnn
         public MultiClusterIndex(
             IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
-            MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
+            IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int? desiredClusterSize,
             int indicesNumber = 2)
         {

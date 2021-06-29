@@ -12,14 +12,14 @@ namespace SpaceHosting.Index.Sparnn.Clusters
     internal sealed class NonTerminalClusterIndex<TRecord> : BaseClusterIndex<TRecord>
         where TRecord : notnull
     {
-        private readonly MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
+        private readonly IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
         private IMatrixMetricSearchSpace<IClusterIndex<TRecord>> clusterSpace = null!;
         private Random random => new Random(42);
 
         public NonTerminalClusterIndex(
             IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
-            MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
+            IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int desiredClusterSize)
             : base(desiredClusterSize)
         {

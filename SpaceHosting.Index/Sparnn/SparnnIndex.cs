@@ -8,13 +8,13 @@ namespace SpaceHosting.Index.Sparnn
 {
     internal class SparnnIndex : IIndex<SparseVector>
     {
-        private readonly MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
+        private readonly IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
         private readonly int indicesNumber;
         private readonly int clusterSize;
         private readonly int vectorDimension;
         private IMultiClusterIndex<long>? multiClusterIndex;
 
-        public SparnnIndex(MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory, int indicesNumber, int clusterSize, int vectorDimension)
+        public SparnnIndex(IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory, int indicesNumber, int clusterSize, int vectorDimension)
         {
             this.matrixMetricSearchSpaceFactory = matrixMetricSearchSpaceFactory;
             this.indicesNumber = indicesNumber;
