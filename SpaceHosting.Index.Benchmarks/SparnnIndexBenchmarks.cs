@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
@@ -36,22 +35,17 @@ namespace SpaceHosting.Index.Benchmarks
         private readonly Random deterministicRandom = new Random(Seed: 42);
         private readonly IndexStoreBuilder indexStoreBuilder = new IndexStoreBuilder(new SilentLog());
 
-        private List<double?[]> vectors = null!;
+        private SparseVector[] vectors = null!;
         private IIndexStore<int, object, SparseVector> indexStore = null!;
         private IndexQueryDataPoint<SparseVector>[] queryDataPoints = null!;
 
         [GlobalSetup]
         public void GlobalSetup()
         {
-            vectors = VectorFile.ReadVectors(
-                @"c:\temp\sparse-vectors-df.csv",
-                VectorsFileFormat.PandasDataFrameCsv);
-            Console.Out.WriteLine($"vectors.Count: {vectors.Count}");
+            vectors = VectorFile.ReadSparseVectors(@"c:\temp\veles-0-77-vectors.json", VectorsFileFormat.SparseVectorArrayJson);
+            Console.Out.WriteLine($"vectors.Count: {vectors.Length}");
 
-            indexStore = indexStoreBuilder.BuildIndexStore(
-                $"{Algorithms.SparnnIndex}.{IndexMetric}",
-                vectors,
-                VectorConversions.ToSparseVector);
+            indexStore = indexStoreBuilder.BuildIndexStore($"{Algorithms.SparnnIndex}.{IndexMetric}", vectors);
             Console.Out.WriteLine($"indexStore.Count: {indexStore.Count}");
         }
 
@@ -60,7 +54,7 @@ namespace SpaceHosting.Index.Benchmarks
         {
             var sampleVectors = vectors.RandomSubset(QueryVectorsCount, deterministicRandom).ToList();
             var sampleVectorsReordered = sampleVectors.Shuffle(deterministicRandom).ToList();
-            var vectorsToSearch = sampleVectors.Zip(sampleVectorsReordered).Select(t => MidPoint(t.First.ToSparseVector(), t.Second.ToSparseVector())).ToArray();
+            var vectorsToSearch = sampleVectors.Zip(sampleVectorsReordered).Select(t => MidPoint(t.First, t.Second)).ToArray();
 
             queryDataPoints = vectorsToSearch.Select(x => new IndexQueryDataPoint<SparseVector> {Vector = x}).ToArray();
         }

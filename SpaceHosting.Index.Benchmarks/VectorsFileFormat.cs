@@ -2,7 +2,8 @@ namespace SpaceHosting.Index.Benchmarks
 {
     public enum VectorsFileFormat
     {
-        VectorArrayJson,
+        DenseVectorArrayJson,
+        SparseVectorArrayJson,
         PandasDataFrameCsv,
         PandasDataFrameJson,
     }

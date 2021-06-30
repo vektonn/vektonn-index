@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using MoreLinq;
@@ -17,8 +16,7 @@ namespace SpaceHosting.Index.Benchmarks
 
         public IIndexStore<int, object, TVector> BuildIndexStore<TVector>(
             string indexAlgorithm,
-            List<double?[]> vectors,
-            Func<double?[], TVector> createVector,
+            IList<TVector> vectors,
             int indexBatchSize = 1000,
             object[]? metadata = null)
             where TVector : IVector
@@ -28,7 +26,7 @@ namespace SpaceHosting.Index.Benchmarks
                     (v, i) => new IndexDataPoint<int, object, TVector>
                     {
                         Id = i,
-                        Vector = createVector(v),
+                        Vector = v,
                         Data = metadata?[i],
                         IsDeleted = false
                     })

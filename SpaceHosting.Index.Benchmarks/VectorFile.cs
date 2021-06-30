@@ -20,27 +20,34 @@ namespace SpaceHosting.Index.Benchmarks
             return metadata;
         }
 
-        public static List<double?[]> ReadVectors(string vectorsFileName, VectorsFileFormat vectorsFileFormat)
+        public static SparseVector[] ReadSparseVectors(string vectorsFileName, VectorsFileFormat vectorsFileFormat)
         {
             var vectors = vectorsFileFormat switch
             {
-                VectorsFileFormat.VectorArrayJson => ReadVectorArrayFile(vectorsFileName),
-                VectorsFileFormat.PandasDataFrameCsv => ReadPandasDataFrameCsvFile(vectorsFileName),
-                VectorsFileFormat.PandasDataFrameJson => ReadPandasDataFrameJsonFile(vectorsFileName),
+                VectorsFileFormat.DenseVectorArrayJson => ReadDenseVectorArrayFile(vectorsFileName).Select(VectorConversions.ToSparseVector).ToArray(),
+                VectorsFileFormat.SparseVectorArrayJson => ReadSparseVectorArrayFile(vectorsFileName).Select(v => new SparseVector(v.dimension, v.columnIndices, v.coordinates)).ToArray(),
+                VectorsFileFormat.PandasDataFrameCsv => ReadPandasDataFrameCsvFile(vectorsFileName).Select(VectorConversions.ToSparseVector).ToArray(),
+                VectorsFileFormat.PandasDataFrameJson => ReadPandasDataFrameJsonFile(vectorsFileName).Select(VectorConversions.ToSparseVector).ToArray(),
                 _ => throw new ArgumentException($"Invalid vectorsFileFormat: {vectorsFileFormat}")
             };
 
-            var vectorDimension = vectors.First().Length;
-            if (vectors.Any(vector => vector.Length != vectorDimension))
+            var vectorDimension = vectors.First().Dimension;
+            if (vectors.Any(vector => vector.Dimension != vectorDimension))
                 throw new InvalidOperationException("All vectors must have the same dimension");
 
             return vectors;
         }
 
-        private static List<double?[]> ReadVectorArrayFile(string vectorsFileName)
+        private static List<double?[]> ReadDenseVectorArrayFile(string vectorsFileName)
         {
             var json = File.ReadAllText(vectorsFileName);
             return JsonSerializer.Deserialize<List<double?[]>>(json)!;
+        }
+
+        private static SparseVectorDto[] ReadSparseVectorArrayFile(string vectorsFileName)
+        {
+            var json = File.ReadAllText(vectorsFileName);
+            return JsonSerializer.Deserialize<SparseVectorDto[]>(json)!;
         }
 
         private static List<double?[]> ReadPandasDataFrameCsvFile(string vectorsFileName)
@@ -63,6 +70,13 @@ namespace SpaceHosting.Index.Benchmarks
                         return vector;
                     })
                 .ToList();
+        }
+
+        private class SparseVectorDto
+        {
+            public int dimension { get; init; }
+            public int[] columnIndices { get; init; } = null!;
+            public double[] coordinates { get; init; } = null!;
         }
     }
 }
