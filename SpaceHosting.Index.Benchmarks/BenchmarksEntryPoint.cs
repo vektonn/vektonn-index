@@ -7,8 +7,8 @@ namespace SpaceHosting.Index.Benchmarks
     {
         public static void Main()
         {
-            var summary = BenchmarkRunner.Run<DistanceSpaceBenchmarks>();
-            Console.WriteLine(summary.ToString());
+            BenchmarkRunner.Run<SparnnIndexBenchmarks>();
+            Console.ReadLine();
         }
     }
 }
