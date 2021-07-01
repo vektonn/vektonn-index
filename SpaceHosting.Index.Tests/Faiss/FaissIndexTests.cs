@@ -13,7 +13,7 @@ namespace SpaceHosting.Index.Tests.Faiss
         private const double HalfPrecisionEpsilon = 1e-03;
         private const double SinglePrecisionEpsilon = 1e-06;
 
-        private readonly Random random = new();
+        private readonly Random random = new Random();
 
         [Test]
         [Repeat(1000)]

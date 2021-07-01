@@ -4,6 +4,7 @@ using System.Linq;
 using BenchmarkDotNet.Attributes;
 using MoreLinq.Extensions;
 using SpaceHosting.Index.Sparnn.Distances;
+using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
 
 namespace SpaceHosting.Index.Benchmarks
 {
@@ -15,7 +16,7 @@ namespace SpaceHosting.Index.Benchmarks
         private const int MinimumValuable = 5;
         private const int MaximumValuable = 15;
 
-        [Params(1, 10, 100)]
+        [Params(1, 10, 100, 1000)]
         public int FeatureVectorsCount;
 
         [Params(1, 10, 50)]
@@ -27,7 +28,7 @@ namespace SpaceHosting.Index.Benchmarks
         private JaccardBinaryDistanceSpace<int> jaccardBinaryDistanceSpace = null!;
         private CosineDistanceSpace<int> cosineDistanceSpace = null!;
         private JaccardBinarySingleFeatureOrientedSpace<int> jaccardSingleFeatureOrientedSpace = null!;
-        private IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> vectorsToSearch = null!;
+        private IList<MSparseVector> vectorsToSearch = null!;
 
         [GlobalSetup]
         public void Setup()
@@ -39,17 +40,21 @@ namespace SpaceHosting.Index.Benchmarks
             jaccardSingleFeatureOrientedSpace = new JaccardBinarySingleFeatureOrientedSpace<int>(baseVectors, elements);
         }
 
+        private void DoBenchmarkThenConsume(IMatrixMetricSearchSpace<int> matrixMetricSearchSpace)
+        {
+            matrixMetricSearchSpace.SearchNearestAsync(vectorsToSearch, KnnCount).GetAwaiter().GetResult().Consume();
+        }
 
         [Benchmark]
-        public void JaccardBinarySingleFeatureOriented() => jaccardSingleFeatureOrientedSpace.SearchNearestAsync(vectorsToSearch, KnnCount).GetAwaiter().GetResult().Consume();
+        public void JaccardBinarySingleFeatureOriented() => DoBenchmarkThenConsume(jaccardSingleFeatureOrientedSpace);
 
         [Benchmark]
-        public void JaccardBinary() => jaccardBinaryDistanceSpace.SearchNearestAsync(vectorsToSearch, KnnCount).GetAwaiter().GetResult().Consume();
+        public void JaccardBinary() => DoBenchmarkThenConsume(jaccardBinaryDistanceSpace);
 
         [Benchmark]
-        public void Cosine() => cosineDistanceSpace.SearchNearestAsync(vectorsToSearch, KnnCount).GetAwaiter().GetResult().Consume();
+        public void Cosine() => DoBenchmarkThenConsume(cosineDistanceSpace);
 
-        private static IEnumerable<MathNet.Numerics.LinearAlgebra.Double.SparseVector> GenerateVectors(int seed, int count)
+        private static IEnumerable<MSparseVector> GenerateVectors(int seed, int count)
         {
             var rnd = new Random(seed);
             return Enumerable.Range(0, count)
@@ -57,7 +62,7 @@ namespace SpaceHosting.Index.Benchmarks
                     _ =>
                     {
                         var valuableCount = rnd.Next(MinimumValuable, MaximumValuable);
-                        return MathNet.Numerics.LinearAlgebra.Double.SparseVector.OfIndexedEnumerable(VectorSize, GetIndexedValues(valuableCount));
+                        return MSparseVector.OfIndexedEnumerable(VectorSize, GetIndexedValues(valuableCount));
                     });
         }
 

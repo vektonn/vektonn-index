@@ -11,7 +11,7 @@ namespace SpaceHosting.Index.Tests
     {
         private const double singlePrecisionEpsilon = 1e-06;
 
-        private readonly Random random = new();
+        private readonly Random random = new Random();
 
         private ILog log = null!;
         private IIndexIdMapping<int> idMapping = null!;

@@ -128,7 +128,7 @@ namespace SpaceHosting.Index.Tests.Faiss
             return index;
         }
 
-        private static DenseVector DenseVector(double[] v) => new(v);
+        private static DenseVector DenseVector(double[] v) => new DenseVector(v);
 
         private static double L2(DenseVector v1, DenseVector v2) => Distance.Euclidean(v1.Coordinates, v2.Coordinates);
 
