@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,11 +11,13 @@ namespace SpaceHosting.Index.Sparnn.Clusters
     internal abstract class BaseClusterIndex<TRecord> : IClusterIndex<TRecord>
         where TRecord : notnull
     {
+        protected readonly Random random;
         protected readonly int desiredClusterSize;
         protected readonly int searchBatchSize;
 
-        protected BaseClusterIndex(int desiredClusterSize)
+        protected BaseClusterIndex(Random random, int desiredClusterSize)
         {
+            this.random = random;
             this.desiredClusterSize = desiredClusterSize;
             searchBatchSize = desiredClusterSize;
         }

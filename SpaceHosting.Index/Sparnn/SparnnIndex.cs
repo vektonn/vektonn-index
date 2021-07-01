@@ -8,14 +8,16 @@ namespace SpaceHosting.Index.Sparnn
 {
     internal class SparnnIndex : IIndex<SparseVector>
     {
+        private readonly Random random;
         private readonly IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
         private readonly int indicesNumber;
         private readonly int clusterSize;
         private readonly int vectorDimension;
         private IMultiClusterIndex<long>? multiClusterIndex;
 
-        public SparnnIndex(IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory, int indicesNumber, int clusterSize, int vectorDimension)
+        public SparnnIndex(Random random, IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory, int indicesNumber, int clusterSize, int vectorDimension)
         {
+            this.random = random;
             this.matrixMetricSearchSpaceFactory = matrixMetricSearchSpaceFactory;
             this.indicesNumber = indicesNumber;
             this.clusterSize = clusterSize;
@@ -34,7 +36,7 @@ namespace SpaceHosting.Index.Sparnn
             var (ids, featureVectors) = data.Select(x => (x.Id, x.Vector.ToIndexVector()));
 
             if (multiClusterIndex is null)
-                multiClusterIndex = new MultiClusterIndex<long>(featureVectors, ids, matrixMetricSearchSpaceFactory, clusterSize, indicesNumber);
+                multiClusterIndex = new MultiClusterIndex<long>(random, featureVectors, ids, matrixMetricSearchSpaceFactory, clusterSize, indicesNumber);
             else
                 multiClusterIndex.Insert(featureVectors, ids);
 

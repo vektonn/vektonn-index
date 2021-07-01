@@ -30,8 +30,8 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
         public void SetUp()
         {
             Random = new Random(42);
-            jaccardBinaryIndex = new SparnnIndex(new TestMatrixMetricSearchSpaceFactory(newVersion: false), indicesNumber, clusterSize, VectorSize);
-            jaccardBinarySingleOrientedIndex = new SparnnIndex(new TestMatrixMetricSearchSpaceFactory(newVersion: true), indicesNumber, clusterSize, VectorSize);
+            jaccardBinaryIndex = new SparnnIndex(new Random(0), new TestMatrixMetricSearchSpaceFactory(newVersion: false), indicesNumber, clusterSize, VectorSize);
+            jaccardBinarySingleOrientedIndex = new SparnnIndex(new Random(0), new TestMatrixMetricSearchSpaceFactory(newVersion: true), indicesNumber, clusterSize, VectorSize);
 
             var baseVectors = GenerateVectors(VectorSpaceSize).Select((x, i) => ((long)i, x));
             foreach (var batch in baseVectors.Batch(size: 1000, b => b.ToArray()))

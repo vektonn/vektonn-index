@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +15,7 @@ namespace SpaceHosting.Index.Sparnn
         private readonly IClusterIndex<TRecord>[] indices;
 
         public MultiClusterIndex(
+            Random random,
             IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
             IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
@@ -21,7 +23,7 @@ namespace SpaceHosting.Index.Sparnn
             int indicesNumber = 2)
         {
             indices = Enumerable.Range(0, indicesNumber)
-                .Select(_ => ClusterIndexFactory.Create(featureVectors, recordsData, matrixMetricSearchSpaceFactory, desiredClusterSize, invoker: null))
+                .Select(_ => ClusterIndexFactory.Create(random, featureVectors, recordsData, matrixMetricSearchSpaceFactory, desiredClusterSize, invoker: null))
                 .ToArray();
         }
 
