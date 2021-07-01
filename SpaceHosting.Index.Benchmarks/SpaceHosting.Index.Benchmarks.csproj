@@ -2,16 +2,23 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <PlatformTarget>x64</PlatformTarget>
     <OutputType>Exe</OutputType>
+    <PlatformTarget>x64</PlatformTarget>
+    <Optimize>true</Optimize>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SpaceHosting.Index\SpaceHosting.Index.csproj" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.0" Condition="'$(OS)' == 'Windows_NT'" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
+  <ItemGroup Condition="'$(Configuration)' == 'Baseline'">
+    <PackageReference Include="SpaceHosting.Index" Version="0.1.5" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)' != 'Baseline'">
+    <ProjectReference Include="..\SpaceHosting.Index\SpaceHosting.Index.csproj" />
   </ItemGroup>
 
 </Project>
