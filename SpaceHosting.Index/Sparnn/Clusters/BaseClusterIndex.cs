@@ -11,13 +11,13 @@ namespace SpaceHosting.Index.Sparnn.Clusters
     internal abstract class BaseClusterIndex<TRecord> : IClusterIndex<TRecord>
         where TRecord : notnull
     {
-        protected readonly Random random;
+        protected readonly Func<Random> rngFactory;
         protected readonly int desiredClusterSize;
         protected readonly int searchBatchSize;
 
-        protected BaseClusterIndex(Random random, int desiredClusterSize)
+        protected BaseClusterIndex(Func<Random> rngFactory, int desiredClusterSize)
         {
-            this.random = random;
+            this.rngFactory = rngFactory;
             this.desiredClusterSize = desiredClusterSize;
             searchBatchSize = desiredClusterSize;
         }

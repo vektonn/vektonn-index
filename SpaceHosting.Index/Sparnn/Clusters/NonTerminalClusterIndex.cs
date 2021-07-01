@@ -16,12 +16,12 @@ namespace SpaceHosting.Index.Sparnn.Clusters
         private IMatrixMetricSearchSpace<IClusterIndex<TRecord>> clusterSpace = null!;
 
         public NonTerminalClusterIndex(
-            Random random,
+            Func<Random> rngFactory,
             IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
             IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int desiredClusterSize)
-            : base(random, desiredClusterSize)
+            : base(rngFactory, desiredClusterSize)
         {
             this.matrixMetricSearchSpaceFactory = matrixMetricSearchSpaceFactory;
             Init(featureVectors, recordsData);
@@ -126,6 +126,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
         {
             var clusterSize = Math.Min(desiredClusterSize, recordsData.Length);
             var clusterNumbers = Enumerable.Range(0, clusterSize).ToArray();
+            var random = rngFactory();
             var clusterSelectionVectors = featureVectors.RandomSubset(clusterSize, random).ToArray();
 
             var tempCosineDistanceSpace = matrixMetricSearchSpaceFactory.Create(clusterSelectionVectors, clusterNumbers, searchBatchSize);
@@ -136,7 +137,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
                 .Select(
                     x => (
                         clusterLeaderVector: clusterSelectionVectors[x.NearestCluster],
-                        cluster: ClusterIndexFactory.Create(random, x.FeatureVectors, x.Records, matrixMetricSearchSpaceFactory, desiredClusterSize, this)));
+                        cluster: ClusterIndexFactory.Create(rngFactory, x.FeatureVectors, x.Records, matrixMetricSearchSpaceFactory, desiredClusterSize, this)));
 
             clusterSpace = matrixMetricSearchSpaceFactory.Create(childClusterLeaderVectors, childClusters.ToArray(), searchBatchSize);
         }

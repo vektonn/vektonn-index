@@ -13,12 +13,12 @@ namespace SpaceHosting.Index.Sparnn.Clusters
         private IClusterIndex<TRecord> root = null!;
 
         public RootClusterIndex(
-            Random random,
+            Func<Random> rngFactory,
             IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
             IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int desiredClusterSize)
-            : base(random, desiredClusterSize)
+            : base(rngFactory, desiredClusterSize)
         {
             this.matrixMetricSearchSpaceFactory = matrixMetricSearchSpaceFactory;
             Init(featureVectors, recordsData);
@@ -54,7 +54,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
 
         protected override void Init(IList<MSparseVector> featureVectors, TRecord[] recordsData)
         {
-            root = ClusterIndexFactory.Create(random, featureVectors, recordsData, matrixMetricSearchSpaceFactory, desiredClusterSize, this);
+            root = ClusterIndexFactory.Create(rngFactory, featureVectors, recordsData, matrixMetricSearchSpaceFactory, desiredClusterSize, this);
         }
     }
 }

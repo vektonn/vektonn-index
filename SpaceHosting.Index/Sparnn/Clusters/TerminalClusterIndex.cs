@@ -16,12 +16,12 @@ namespace SpaceHosting.Index.Sparnn.Clusters
         private RecordsToIndexMap recordsToIndex = null!;
 
         public TerminalClusterIndex(
-            Random random,
+            Func<Random> rngFactory,
             IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
             IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int desiredClusterSize)
-            : base(random, desiredClusterSize)
+            : base(rngFactory, desiredClusterSize)
         {
             this.matrixMetricSearchSpaceFactory = matrixMetricSearchSpaceFactory;
             Init(featureVectors, recordsData);
