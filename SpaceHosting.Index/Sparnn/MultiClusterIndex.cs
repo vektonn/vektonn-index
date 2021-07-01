@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -5,7 +6,7 @@ using MoreLinq;
 using SpaceHosting.Index.Sparnn.Clusters;
 using SpaceHosting.Index.Sparnn.Distances;
 using SpaceHosting.Index.Sparnn.Helpers;
-
+using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
 namespace SpaceHosting.Index.Sparnn
 {
     internal class MultiClusterIndex<TRecord> : IMultiClusterIndex<TRecord>
@@ -14,19 +15,20 @@ namespace SpaceHosting.Index.Sparnn
         private readonly IClusterIndex<TRecord>[] indices;
 
         public MultiClusterIndex(
-            IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors,
+            Random random,
+            IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
-            MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
+            IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int? desiredClusterSize,
             int indicesNumber = 2)
         {
             indices = Enumerable.Range(0, indicesNumber)
-                .Select(_ => ClusterIndexFactory.Create(featureVectors, recordsData, matrixMetricSearchSpaceFactory, desiredClusterSize, invoker: null))
+                .Select(_ => ClusterIndexFactory.Create(random, featureVectors, recordsData, matrixMetricSearchSpaceFactory, desiredClusterSize, invoker: null))
                 .ToArray();
         }
 
         public IEnumerable<NearestSearchResult<TRecord>[]> Search(
-            IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors,
+            IList<MSparseVector> featureVectors,
             int resultsNumber,
             int clustersToSearchNumber,
             int? indicesToSearchNumberInput = null)
@@ -50,7 +52,7 @@ namespace SpaceHosting.Index.Sparnn
             }
         }
 
-        public void Insert(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, TRecord[] recordsData)
+        public void Insert(IList<MSparseVector> featureVectors, TRecord[] recordsData)
         {
             var insertionTasks = indices
                 .Select(index => index.InsertAsync(featureVectors, recordsData))

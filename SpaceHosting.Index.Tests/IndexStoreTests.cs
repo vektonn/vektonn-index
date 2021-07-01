@@ -119,7 +119,7 @@ namespace SpaceHosting.Index.Tests
                             (Id: 1011, Distance: 0.11, vector1Nearest1),
                             (Id: 1012, Distance: 0.12, vector1Nearest2),
                         },
-                        new (long Id, double Distance, DenseVector Vector)[] {}
+                        Array.Empty<(long Id, double Distance, DenseVector Vector)>()
                     });
 
             A.CallTo(() => idMapping.GetIdByIndexId(1011)).Returns(11);

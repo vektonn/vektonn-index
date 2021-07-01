@@ -7,7 +7,7 @@ namespace SpaceHosting.Index.Tests
 {
     public class IndexStoreFactoryTests
     {
-        private readonly IndexStoreFactory<int, string> indexStoreFactory = new IndexStoreFactory<int, string>(new SilentLog());
+        private readonly IndexStoreFactory<int, string> indexStoreFactory = new(new SilentLog());
 
         [Test]
         [Category("RequiresNativeFaissLibrary")]

@@ -24,7 +24,7 @@ namespace SpaceHosting.Index.Tests.Faiss
         private const int ExpectedDistinctVectorsCount = 10996;
         private const int ExpectedScatteredVectorsCount = 10979;
 
-        private readonly Random deterministicRandom = new Random(Seed: 0);
+        private readonly Random deterministicRandom = new(Seed: 0);
 
         [Test]
         public void SearchVectorsThemselves()
@@ -33,11 +33,11 @@ namespace SpaceHosting.Index.Tests.Faiss
 
             using var index = NewFaissIndex(vectors);
 
-            foreach (var t in vectors)
+            foreach (var (_, vector) in vectors)
             {
-                var nearest = index.FindNearest(new[] {t.Vector}, limitPerQuery: 1).Single().Single();
+                var nearest = index.FindNearest(new[] {vector}, limitPerQuery: 1).Single().Single();
 
-                L2(nearest.Vector, t.Vector).Should().BeApproximately(0.0, SinglePrecisionEpsilon);
+                L2(nearest.Vector, vector).Should().BeApproximately(0.0, SinglePrecisionEpsilon);
                 nearest.Distance.Should().BeApproximately(0.0, SinglePrecisionEpsilon);
             }
         }
@@ -49,14 +49,14 @@ namespace SpaceHosting.Index.Tests.Faiss
 
             using var index = NewFaissIndex(scatteredVectors);
 
-            foreach (var t in scatteredVectors)
+            foreach (var (scatteredVectorId, scatteredVector) in scatteredVectors)
             {
-                var nearest = index.FindNearest(new[] {t.Vector}, limitPerQuery: 1).Single().Single();
+                var (nearestVectorId, distance, nearestVector) = index.FindNearest(new[] {scatteredVector}, limitPerQuery: 1).Single().Single();
 
-                L2(nearest.Vector, t.Vector).Should().Be(0.0);
-                nearest.Distance.Should().Be(0.0);
-                nearest.Id.Should().Be(t.Id);
-                nearest.Vector.Should().BeEquivalentTo(t.Vector);
+                L2(nearestVector, scatteredVector).Should().Be(0.0);
+                distance.Should().Be(0.0);
+                nearestVectorId.Should().Be(scatteredVectorId);
+                nearestVector.Should().BeEquivalentTo(scatteredVector);
             }
         }
 

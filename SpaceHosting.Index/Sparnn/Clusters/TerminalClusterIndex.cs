@@ -1,24 +1,27 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using SpaceHosting.Index.Sparnn.Distances;
 using SpaceHosting.Index.Sparnn.Helpers;
+using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
 
 namespace SpaceHosting.Index.Sparnn.Clusters
 {
     internal sealed class TerminalClusterIndex<TRecord> : BaseClusterIndex<TRecord>
         where TRecord : notnull
     {
-        private readonly MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
-        private MatrixMetricSearchSpace<TRecord> recordSpace = null!;
+        private readonly IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
+        private IMatrixMetricSearchSpace<TRecord> recordSpace = null!;
         private RecordsToIndexMap recordsToIndex = null!;
 
         public TerminalClusterIndex(
-            IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors,
+            Random random,
+            IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
-            MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
+            IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int desiredClusterSize)
-            : base(desiredClusterSize)
+            : base(random, desiredClusterSize)
         {
             this.matrixMetricSearchSpaceFactory = matrixMetricSearchSpaceFactory;
             Init(featureVectors, recordsData);
@@ -26,7 +29,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
 
         public override bool IsOverflowed => recordSpace.Elements.Count > desiredClusterSize * 5;
 
-        public override Task InsertAsync(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, TRecord[] records)
+        public override Task InsertAsync(IList<MSparseVector> featureVectors, TRecord[] records)
         {
             return Task.Run(
                 () =>
@@ -36,7 +39,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
                 });
         }
 
-        public override (IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, IList<TRecord> records) GetChildData()
+        public override (IList<MSparseVector> featureVectors, IList<TRecord> records) GetChildData()
         {
             return (recordSpace.FeatureMatrix.Vectors, recordSpace.Elements);
         }
@@ -46,12 +49,12 @@ namespace SpaceHosting.Index.Sparnn.Clusters
             return Task.Run(() => DeleteInternal(recordsToBeDeleted));
         }
 
-        protected override Task<IEnumerable<NearestSearchResult<TRecord>[]>> SearchInternalAsync(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, int resultsNumber, int clustersSearchNumber)
+        protected override Task<IEnumerable<NearestSearchResult<TRecord>[]>> SearchInternalAsync(IList<MSparseVector> featureVectors, int resultsNumber, int clustersSearchNumber)
         {
             return recordSpace.SearchNearestAsync(featureVectors, resultsNumber);
         }
 
-        protected override void Init(IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> featureVectors, TRecord[] recordsData)
+        protected override void Init(IList<MSparseVector> featureVectors, TRecord[] recordsData)
         {
             recordSpace = matrixMetricSearchSpaceFactory.Create(featureVectors, recordsData, searchBatchSize);
             recordsToIndex = new RecordsToIndexMap(recordsData);

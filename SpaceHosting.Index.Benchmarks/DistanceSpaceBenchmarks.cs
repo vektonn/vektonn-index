@@ -4,6 +4,7 @@ using System.Linq;
 using BenchmarkDotNet.Attributes;
 using MoreLinq.Extensions;
 using SpaceHosting.Index.Sparnn.Distances;
+using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
 
 namespace SpaceHosting.Index.Benchmarks
 {
@@ -15,32 +16,45 @@ namespace SpaceHosting.Index.Benchmarks
         private const int MinimumValuable = 5;
         private const int MaximumValuable = 15;
 
-        [Params(100, 1000)]
-        public int featureVectorsCount;
+        [Params(1, 10, 100, 1000)]
+        public int FeatureVectorsCount;
+
+        [Params(1, 10, 50)]
+        public int KnnCount;
 
         private readonly int searchBatchSize = Math.Max((int)Math.Sqrt(VectorSpaceSize), 1000);
         private readonly int[] elements = Enumerable.Range(0, VectorSpaceSize).ToArray();
 
-        private JaccardBinaryDistanceSpace<int> jaccard = null!;
-        private CosineDistanceSpace<int> cosine = null!;
-        private IList<MathNet.Numerics.LinearAlgebra.Double.SparseVector> vectorsToSearch = null!;
+        private JaccardBinaryDistanceSpace<int> jaccardBinaryDistanceSpace = null!;
+        private CosineDistanceSpace<int> cosineDistanceSpace = null!;
+        private JaccardBinarySingleFeatureOrientedSpace<int> jaccardSingleFeatureOrientedSpace = null!;
+        private IList<MSparseVector> vectorsToSearch = null!;
 
         [GlobalSetup]
         public void Setup()
         {
             var baseVectors = GenerateVectors(42, VectorSpaceSize).ToList();
-            vectorsToSearch = GenerateVectors(420, featureVectorsCount).ToList();
-            jaccard = new JaccardBinaryDistanceSpace<int>(baseVectors, elements, searchBatchSize);
-            cosine = new CosineDistanceSpace<int>(baseVectors, elements, searchBatchSize);
+            vectorsToSearch = GenerateVectors(420, FeatureVectorsCount).ToList();
+            jaccardBinaryDistanceSpace = new JaccardBinaryDistanceSpace<int>(baseVectors, elements, searchBatchSize);
+            cosineDistanceSpace = new CosineDistanceSpace<int>(baseVectors, elements, searchBatchSize);
+            jaccardSingleFeatureOrientedSpace = new JaccardBinarySingleFeatureOrientedSpace<int>(baseVectors, elements);
+        }
+
+        private void DoBenchmarkThenConsume(IMatrixMetricSearchSpace<int> matrixMetricSearchSpace)
+        {
+            matrixMetricSearchSpace.SearchNearestAsync(vectorsToSearch, KnnCount).GetAwaiter().GetResult().Consume();
         }
 
         [Benchmark]
-        public void JaccardBinary() => jaccard.SearchNearestAsync(vectorsToSearch, 20).Result.Consume();
+        public void JaccardBinarySingleFeatureOriented() => DoBenchmarkThenConsume(jaccardSingleFeatureOrientedSpace);
 
         [Benchmark]
-        public void Cosine() => cosine.SearchNearestAsync(vectorsToSearch, 20).Result.Consume();
+        public void JaccardBinary() => DoBenchmarkThenConsume(jaccardBinaryDistanceSpace);
 
-        private IEnumerable<MathNet.Numerics.LinearAlgebra.Double.SparseVector> GenerateVectors(int seed, int count)
+        [Benchmark]
+        public void Cosine() => DoBenchmarkThenConsume(cosineDistanceSpace);
+
+        private static IEnumerable<MSparseVector> GenerateVectors(int seed, int count)
         {
             var rnd = new Random(seed);
             return Enumerable.Range(0, count)
@@ -48,16 +62,16 @@ namespace SpaceHosting.Index.Benchmarks
                     _ =>
                     {
                         var valuableCount = rnd.Next(MinimumValuable, MaximumValuable);
-                        return MathNet.Numerics.LinearAlgebra.Double.SparseVector.OfIndexedEnumerable(VectorSize, GetIndexedValues(valuableCount, rnd));
+                        return MSparseVector.OfIndexedEnumerable(VectorSize, GetIndexedValues(valuableCount));
                     });
         }
 
-        private IEnumerable<Tuple<int, double>> GetIndexedValues(int count, Random rnd)
+        private static IEnumerable<Tuple<int, double>> GetIndexedValues(int count)
         {
             return Enumerable
                 .Range(0, VectorSize)
                 .RandomSubset(count)
-                .Select(i => new Tuple<int, double>(i, rnd.NextDouble()));
+                .Select(i => new Tuple<int, double>(i, 1.0));
         }
     }
 }
