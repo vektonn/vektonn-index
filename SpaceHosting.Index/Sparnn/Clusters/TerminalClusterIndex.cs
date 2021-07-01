@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,16 +11,17 @@ namespace SpaceHosting.Index.Sparnn.Clusters
     internal sealed class TerminalClusterIndex<TRecord> : BaseClusterIndex<TRecord>
         where TRecord : notnull
     {
-        private readonly MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
+        private readonly IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
         private IMatrixMetricSearchSpace<TRecord> recordSpace = null!;
         private RecordsToIndexMap recordsToIndex = null!;
 
         public TerminalClusterIndex(
+            Random random,
             IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
-            MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
+            IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int desiredClusterSize)
-            : base(desiredClusterSize)
+            : base(random, desiredClusterSize)
         {
             this.matrixMetricSearchSpaceFactory = matrixMetricSearchSpaceFactory;
             Init(featureVectors, recordsData);

@@ -13,20 +13,53 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
     [TestFixture]
     public class JaccardMethodsComparisonTests
     {
-        private SparnnIndex jaccardBinaryIndex = null!;
-        private SparnnIndex jaccardBinarySingleOrientedIndex = null!;
-        private SparseVector[] vectorsToSearch = null!;
-
         private const int VectorSpaceSize = 15_000;
         private const int VectorSize = 15_000;
         private const int MinimumValuable = 5;
         private const int MaximumValuable = 15;
         private const int FeatureVectorsCount = 1;
 
-        const int indicesNumber = 2;
-        const int clusterSize = 1000;
+        private const int indicesNumber = 2;
+        private const int clusterSize = 1000;
         private static Random Random = null!;
+        private SparnnIndex jaccardBinaryIndex = null!;
+        private SparnnIndex jaccardBinarySingleOrientedIndex = null!;
+        private SparseVector[] vectorsToSearch = null!;
 
+        [SetUp]
+        public void SetUp()
+        {
+            Random = new Random(42);
+            jaccardBinaryIndex = new SparnnIndex(new Random(0), new TestMatrixMetricSearchSpaceFactory(newVersion: false), indicesNumber, clusterSize, VectorSize);
+            jaccardBinarySingleOrientedIndex = new SparnnIndex(new Random(0), new TestMatrixMetricSearchSpaceFactory(newVersion: true), indicesNumber, clusterSize, VectorSize);
+
+            var baseVectors = GenerateVectors(VectorSpaceSize).Select((x, i) => ((long)i, x));
+            foreach (var batch in baseVectors.Batch(size: 1000, b => b.ToArray()))
+            {
+                jaccardBinaryIndex.AddBatch(batch);
+                jaccardBinarySingleOrientedIndex.AddBatch(batch);
+            }
+
+            vectorsToSearch = GenerateVectors(FeatureVectorsCount).ToArray();
+        }
+
+        [TestCase(1)]
+        [TestCase(10)]
+        [TestCase(100)]
+        [TestCase(1000)]
+        public void FindNearestReturnsSameResult(int kNearestCount)
+        {
+            double AccumulateNearestVectorResultDistance(SparnnIndex sparnnIndex)
+            {
+                var searchResult = sparnnIndex.FindNearest(vectorsToSearch, kNearestCount);
+                searchResult.Should().HaveCount(1);
+                return searchResult[0].Select(x => x.Distance).Sum();
+            }
+
+            var firstMethodAccumulatedError = AccumulateNearestVectorResultDistance(jaccardBinaryIndex);
+            var secondMethodAccumulatedError = AccumulateNearestVectorResultDistance(jaccardBinarySingleOrientedIndex);
+            (firstMethodAccumulatedError - secondMethodAccumulatedError).Should().BeLessThan(double.Epsilon);
+        }
 
         private static IEnumerable<Tuple<int, double>> GetIndexedValues(int count)
         {
@@ -43,40 +76,21 @@ namespace SpaceHosting.Index.Tests.Sparnn.Distances
                 .Select(valuableCount => MSparseVector.OfIndexedEnumerable(VectorSize, GetIndexedValues(valuableCount)).ToModelVector());
         }
 
-        [SetUp]
-        public void SetUp()
+        private class TestMatrixMetricSearchSpaceFactory : IMatrixMetricSearchSpaceFactory
         {
-            Random = new Random(42);
-            jaccardBinaryIndex = new SparnnIndex(new MatrixMetricSearchSpaceFactory(MatrixMetricSearchSpaceAlgorithm.JaccardBinary), indicesNumber, clusterSize, VectorSize);
-            jaccardBinarySingleOrientedIndex = new SparnnIndex(new MatrixMetricSearchSpaceFactory(MatrixMetricSearchSpaceAlgorithm.JaccardBinarySingleFeatureOriented), indicesNumber, clusterSize, VectorSize);
+            private readonly bool newVersion;
 
-            var baseVectors = GenerateVectors(VectorSpaceSize).Select((x, i) => ((long)i, x));
-            foreach (var batch in baseVectors.Batch(size: 1000, b => b.ToArray()))
+            public TestMatrixMetricSearchSpaceFactory(bool newVersion)
             {
-                jaccardBinaryIndex.AddBatch(batch);
-                jaccardBinarySingleOrientedIndex.AddBatch(batch);
+                this.newVersion = newVersion;
             }
 
-            vectorsToSearch = GenerateVectors(FeatureVectorsCount).ToArray();
-        }
-
-        [TestCase(1)]
-        [TestCase(10)]
-        [TestCase(100)]
-        [TestCase(1000)]
-
-        public void FindNearestReturnsSameResult(int kNearestCount)
-        {
-            double AccumulateNearestVectorResultDistanse(SparnnIndex sparnnIndex)
+            public IMatrixMetricSearchSpace<TElement> Create<TElement>(IList<MSparseVector> featureVectors, TElement[] elements, int searchBatchSize)
             {
-                var searchResult = sparnnIndex.FindNearest(vectorsToSearch, kNearestCount);
-                searchResult.Should().HaveCount(1);
-                return searchResult[0].Select(x => x.Distance).Sum();
+                return newVersion
+                    ? new JaccardBinarySingleFeatureOrientedSpace<TElement>(featureVectors, elements)
+                    : new JaccardBinaryDistanceSpace<TElement>(featureVectors, elements, searchBatchSize);
             }
-
-            var firstMethodAccumulatedError = AccumulateNearestVectorResultDistanse(jaccardBinaryIndex);
-            var secondMethodAccumulatedError = AccumulateNearestVectorResultDistanse(jaccardBinarySingleOrientedIndex);
-            (firstMethodAccumulatedError - secondMethodAccumulatedError).Should().BeLessThan(double.Epsilon);
         }
     }
 }

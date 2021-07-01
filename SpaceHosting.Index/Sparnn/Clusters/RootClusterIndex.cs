@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using SpaceHosting.Index.Sparnn.Distances;
@@ -7,15 +8,16 @@ namespace SpaceHosting.Index.Sparnn.Clusters
     internal class RootClusterIndex<TRecord> : BaseClusterIndex<TRecord>
         where TRecord : notnull
     {
-        private readonly MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
+        private readonly IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory;
         private IClusterIndex<TRecord> root = null!;
 
         public RootClusterIndex(
+            Random random,
             IList<MSparseVector> featureVectors,
             TRecord[] recordsData,
-            MatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
+            IMatrixMetricSearchSpaceFactory matrixMetricSearchSpaceFactory,
             int desiredClusterSize)
-            : base(desiredClusterSize)
+            : base(random, desiredClusterSize)
         {
             this.matrixMetricSearchSpaceFactory = matrixMetricSearchSpaceFactory;
             Init(featureVectors, recordsData);
@@ -51,7 +53,7 @@ namespace SpaceHosting.Index.Sparnn.Clusters
 
         protected override void Init(IList<MSparseVector> featureVectors, TRecord[] recordsData)
         {
-            root = ClusterIndexFactory.Create(featureVectors, recordsData, matrixMetricSearchSpaceFactory, desiredClusterSize, this);
+            root = ClusterIndexFactory.Create(random, featureVectors, recordsData, matrixMetricSearchSpaceFactory, desiredClusterSize, this);
         }
     }
 }

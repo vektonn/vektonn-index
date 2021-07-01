@@ -23,6 +23,7 @@ namespace SpaceHosting.Index
             {Algorithms.SparnnIndexJaccardBinary, MatrixMetricSearchSpaceAlgorithm.JaccardBinary}
         };
 
+        private readonly Random random = new Random();
         private readonly IIndexDataStorage<TId, TData> emptyDataStorage = new EmptyIndexDataStorage<TId, TData>();
 
         private readonly ILog log;
@@ -76,7 +77,7 @@ namespace SpaceHosting.Index
                 throw new ArgumentException($"Invalid index algorithm: {algorithm}");
 
             var matrixMetricSearchSpaceFactory = new MatrixMetricSearchSpaceFactory(searchSpaceAlgorithm);
-            return new SparnnIndex(matrixMetricSearchSpaceFactory, indicesNumber, clusterSize, vectorDimension);
+            return new SparnnIndex(random, matrixMetricSearchSpaceFactory, indicesNumber, clusterSize, vectorDimension);
         }
     }
 }
