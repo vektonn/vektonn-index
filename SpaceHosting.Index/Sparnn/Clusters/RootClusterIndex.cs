@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using SpaceHosting.Index.Sparnn.Distances;
 using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
+
 namespace SpaceHosting.Index.Sparnn.Clusters
 {
     internal class RootClusterIndex<TRecord> : BaseClusterIndex<TRecord>

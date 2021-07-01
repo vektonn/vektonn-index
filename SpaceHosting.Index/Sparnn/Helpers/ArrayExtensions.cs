@@ -5,13 +5,6 @@ namespace SpaceHosting.Index.Sparnn.Helpers
 {
     internal static class ArrayExtensions
     {
-        private class PairComparer : IComparer<(int, double)>
-        {
-            public int Compare((int, double) x, (int, double) y)
-            {
-                return x.Item2.CompareTo(y.Item2);
-            }
-        }
         public static List<(int, double)> TakeKBest(this double[] elements, int k)
         {
             var comparer = new PairComparer();
@@ -84,6 +77,14 @@ namespace SpaceHosting.Index.Sparnn.Helpers
 
             var result = 1.0 - (double)match / cardinality;
             return result;
+        }
+
+        private class PairComparer : IComparer<(int, double)>
+        {
+            public int Compare((int, double) x, (int, double) y)
+            {
+                return x.Item2.CompareTo(y.Item2);
+            }
         }
     }
 }

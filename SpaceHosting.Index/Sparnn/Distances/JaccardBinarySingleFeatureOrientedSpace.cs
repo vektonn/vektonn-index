@@ -11,9 +11,6 @@ namespace SpaceHosting.Index.Sparnn.Distances
     {
         private readonly int[][] nonZerosIndexes;
         private readonly int vectorSize;
-        public SparseVectorsList FeatureMatrix { get; }
-
-        public IList<TElement> Elements { get; }
 
         public JaccardBinarySingleFeatureOrientedSpace(IList<MSparseVector> featureVectors, TElement[] elements)
         {
@@ -22,6 +19,10 @@ namespace SpaceHosting.Index.Sparnn.Distances
             nonZerosIndexes = featureVectors.Select(x => x.NonZerosIndices()).ToArray();
             vectorSize = featureVectors.First().Count;
         }
+
+        public SparseVectorsList FeatureMatrix { get; }
+
+        public IList<TElement> Elements { get; }
 
         public Task<IEnumerable<NearestSearchResult<TElement>[]>> SearchNearestAsync(IList<MSparseVector> featureVectors, int resultsNumber)
         {
@@ -42,19 +43,19 @@ namespace SpaceHosting.Index.Sparnn.Distances
 
             return Task.FromResult(res);
         }
-        
+
         private static IEnumerable<List<(int, double)>> SearchNearestAsyncInternalAsync(int[][] featureVectors, int[][] searchSpace, int resultsNumber)
         {
-            for (int i = 0; i < featureVectors.Length; i++)
+            for (var i = 0; i < featureVectors.Length; i++)
             {
                 var distances = new double[searchSpace.Length];
-                for (int j = 0; j < searchSpace.Length; j++)
+                for (var j = 0; j < searchSpace.Length; j++)
                 {
                     distances[j] = featureVectors[i].JaccardBinaryDistance(searchSpace[j]);
                 }
+
                 yield return distances.TakeKBest(resultsNumber);
             }
         }
     }
 }
-

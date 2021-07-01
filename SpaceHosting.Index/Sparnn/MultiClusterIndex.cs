@@ -7,6 +7,7 @@ using SpaceHosting.Index.Sparnn.Clusters;
 using SpaceHosting.Index.Sparnn.Distances;
 using SpaceHosting.Index.Sparnn.Helpers;
 using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
+
 namespace SpaceHosting.Index.Sparnn
 {
     internal class MultiClusterIndex<TRecord> : IMultiClusterIndex<TRecord>

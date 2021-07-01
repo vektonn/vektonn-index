@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using SpaceHosting.Index.Sparnn.Clusters;
 using SpaceHosting.Index.Sparnn.Distances;
-
 using MSparseVector = MathNet.Numerics.LinearAlgebra.Double.SparseVector;
+
 namespace SpaceHosting.Index.Sparnn
 {
     internal static class ClusterIndexFactory

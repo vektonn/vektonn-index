@@ -40,11 +40,6 @@ namespace SpaceHosting.Index.Benchmarks
             jaccardSingleFeatureOrientedSpace = new JaccardBinarySingleFeatureOrientedSpace<int>(baseVectors, elements);
         }
 
-        private void DoBenchmarkThenConsume(IMatrixMetricSearchSpace<int> matrixMetricSearchSpace)
-        {
-            matrixMetricSearchSpace.SearchNearestAsync(vectorsToSearch, KnnCount).GetAwaiter().GetResult().Consume();
-        }
-
         [Benchmark]
         public void JaccardBinarySingleFeatureOriented() => DoBenchmarkThenConsume(jaccardSingleFeatureOrientedSpace);
 
@@ -53,6 +48,11 @@ namespace SpaceHosting.Index.Benchmarks
 
         [Benchmark]
         public void Cosine() => DoBenchmarkThenConsume(cosineDistanceSpace);
+
+        private void DoBenchmarkThenConsume(IMatrixMetricSearchSpace<int> matrixMetricSearchSpace)
+        {
+            matrixMetricSearchSpace.SearchNearestAsync(vectorsToSearch, KnnCount).GetAwaiter().GetResult().Consume();
+        }
 
         private static IEnumerable<MSparseVector> GenerateVectors(int seed, int count)
         {
