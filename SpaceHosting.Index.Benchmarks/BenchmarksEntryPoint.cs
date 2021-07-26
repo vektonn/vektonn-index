@@ -7,7 +7,7 @@ namespace SpaceHosting.Index.Benchmarks
     {
         public static void Main()
         {
-            BenchmarkRunner.Run<SparnnIndexBenchmarks>();
+            BenchmarkRunner.Run<IndexStoreMemoryUsageBenchmarks>();
             Console.ReadLine();
         }
     }

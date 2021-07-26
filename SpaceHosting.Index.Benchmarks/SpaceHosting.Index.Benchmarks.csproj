@@ -5,12 +5,14 @@
     <OutputType>Exe</OutputType>
     <PlatformTarget>x64</PlatformTarget>
     <Optimize>true</Optimize>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ServerGarbageCollection>false</ServerGarbageCollection>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
     <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.0" Condition="'$(OS)' == 'Windows_NT'" />
+    <PackageReference Include="protobuf-net" Version="3.0.101" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'Baseline'">
