@@ -172,16 +172,10 @@ namespace SpaceHosting.Index.Benchmarks
             GC.Collect(generation: 2, GCCollectionMode.Forced, blocking: true, compacting: true);
         }
 
-        [ProtoContract]
         public class DataPointKeyValueFat
         {
-            [ProtoMember(1)]
             public string? StringValue { get; set; }
-
-            [ProtoMember(2)]
             public Guid? GuidValue { get; set; }
-
-            [ProtoMember(3)]
             public bool? BooleanValue { get; set; }
 
             public override string ToString()
