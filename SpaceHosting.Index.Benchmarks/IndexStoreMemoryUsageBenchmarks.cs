@@ -79,7 +79,7 @@ namespace SpaceHosting.Index.Benchmarks
             var indexDataPoints = ProduceIndexDataPoints(newId);
 
             foreach (var batch in indexDataPoints.Batch(size: 1000, b => b.ToArray()))
-                indexStores[deterministicRandom.Next(SplitCount)].AddBatch(batch);
+                indexStores[deterministicRandom.Next(SplitCount)].UpdateIndex(batch);
 
             LogMemoryUsage(message);
 
@@ -94,18 +94,17 @@ namespace SpaceHosting.Index.Benchmarks
             CollectGarbageWithLohCompaction();
         }
 
-        private IEnumerable<IndexDataPoint<TId, TId, DenseVector>> ProduceIndexDataPoints<TId>(Func<TId> newId)
+        private IEnumerable<IndexDataPointOrTombstone<TId, TId, DenseVector>> ProduceIndexDataPoints<TId>(Func<TId> newId)
             where TId : notnull
         {
             for (var i = 0; i < VectorCount; i++)
             {
-                yield return new IndexDataPoint<TId, TId, DenseVector>
-                {
-                    Id = newId(),
-                    Vector = RandomVector(),
-                    Data = default,
-                    IsDeleted = false
-                };
+                yield return new IndexDataPointOrTombstone<TId, TId, DenseVector>(
+                    new IndexDataPoint<TId, TId, DenseVector>(
+                        Id: newId(),
+                        Vector: RandomVector(),
+                        Data: default
+                    ));
             }
         }
 

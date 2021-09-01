@@ -30,60 +30,58 @@ namespace SpaceHosting.Index
 
         public long Count => index.VectorCount;
 
-        public void AddBatch(IndexDataPoint<TId, TData, TVector>[] dataPoints)
+        public void UpdateIndex(IndexDataPointOrTombstone<TId, TData, TVector>[] dataPointOrTombstones)
         {
             log.Debug(
-                $"Adding batch of {dataPoints.Length}, before: " +
+                $"Adding batch of {dataPointOrTombstones.Length}, before: " +
                 $"index size = {index.VectorCount}, " +
                 $"id map size = {idMapping.Count}, " +
                 $"data size = {storage.Count}");
 
-            var dataPointsWithIndexIds = dataPoints
-                .GroupBy(x => x.Id, idComparer)
+            var dataPointsWithIndexIds = dataPointOrTombstones
+                .GroupBy(x => x.GetId(), idComparer)
                 .Select(x => x.Last())
                 .Select(
                     x => new
                     {
-                        IndexId = idMapping.FindIndexIdById(x.Id),
-                        DataPoint = x
+                        IndexId = idMapping.FindIndexIdById(x.GetId()),
+                        DataPointOrTombstone = x
                     })
                 .ToList();
 
-            var dataPointsWithIndexIdsToRemove = dataPointsWithIndexIds
-                .Where(x => x.IndexId.HasValue && x.DataPoint.IsDeleted)
-                .Select(x => new {x.DataPoint, IndexId = x.IndexId!.Value})
+            var tombstonesWithIndexIdsToRemove = dataPointsWithIndexIds
+                .Where(x => x.IndexId.HasValue && x.DataPointOrTombstone.Tombstone != null)
+                .Select(x => (Tombstone: x.DataPointOrTombstone.Tombstone!, IndexId: x.IndexId!.Value))
                 .ToArray();
             var dataPointsWithIndexIdsToUpdate = dataPointsWithIndexIds
-                .Where(x => x.IndexId.HasValue && !x.DataPoint.IsDeleted)
-                .Select(x => new {x.DataPoint, IndexId = x.IndexId!.Value})
+                .Where(x => x.IndexId.HasValue && x.DataPointOrTombstone.Tombstone == null)
+                .Select(x => (DataPoint: x.DataPointOrTombstone.DataPoint!, IndexId: x.IndexId!.Value))
                 .ToArray();
             var dataPointsWithIndexIdsToSkip = dataPointsWithIndexIds
-                .Where(x => !x.IndexId.HasValue && x.DataPoint.IsDeleted)
-                .Select(x => new {x.DataPoint})
+                .Where(x => !x.IndexId.HasValue && x.DataPointOrTombstone.Tombstone != null)
                 .ToArray();
             var dataPointsWithIndexIdsToAdd = dataPointsWithIndexIds
-                .Where(x => !x.IndexId.HasValue && !x.DataPoint.IsDeleted)
+                .Where(x => !x.IndexId.HasValue && x.DataPointOrTombstone.Tombstone == null)
                 .Select(
-                    x => new
-                    {
-                        x.DataPoint,
-                        IndexId = idMapping.Add(x.DataPoint.Id)
-                    })
+                    x =>
+                    (
+                        DataPoint: x.DataPointOrTombstone.DataPoint!,
+                        IndexId: idMapping.Add(x.DataPointOrTombstone.DataPoint!.Id)
+                    ))
                 .ToArray();
 
             log.Debug(
-                $"Adding batch of {dataPoints.Length}: " +
+                $"Adding batch of {dataPointOrTombstones.Length}: " +
                 $"{dataPointsWithIndexIds.Count} without duplicates, " +
                 $"{dataPointsWithIndexIdsToSkip.Length} to skip, " +
-                $"{dataPointsWithIndexIdsToRemove.Length} to remove, " +
+                $"{tombstonesWithIndexIdsToRemove.Length} to remove, " +
                 $"{dataPointsWithIndexIdsToUpdate.Length} to update, " +
                 $"{dataPointsWithIndexIdsToAdd.Length} to add");
 
-            if (dataPointsWithIndexIdsToRemove.Any() || dataPointsWithIndexIdsToUpdate.Any())
+            if (tombstonesWithIndexIdsToRemove.Any() || dataPointsWithIndexIdsToUpdate.Any())
             {
-                var ids = dataPointsWithIndexIdsToRemove
-                    .Concat(dataPointsWithIndexIdsToUpdate)
-                    .Select(x => x.IndexId)
+                var ids = tombstonesWithIndexIdsToRemove.Select(t => t.IndexId)
+                    .Concat(dataPointsWithIndexIdsToUpdate.Select(t => t.IndexId))
                     .ToArray();
 
                 var nRemoved = index.DeleteBatch(ids);
@@ -96,60 +94,53 @@ namespace SpaceHosting.Index
                 index.AddBatch(
                     dataPointsWithIndexIdsToUpdate
                         .Concat(dataPointsWithIndexIdsToAdd)
-                        .Select(dp => (dp.IndexId, dp.DataPoint.Vector))
+                        .Select(t => (t.IndexId, t.DataPoint.Vector))
                         .ToArray());
             }
 
-            foreach (var dataPointWithIndexId in dataPointsWithIndexIdsToRemove)
+            foreach (var (tombstone, _) in tombstonesWithIndexIdsToRemove)
             {
-                idMapping.Delete(dataPointWithIndexId.DataPoint.Id);
-                storage.Delete(dataPointWithIndexId.DataPoint.Id);
+                idMapping.Delete(tombstone.Id);
+                storage.Delete(tombstone.Id);
             }
 
-            foreach (var dataPointWithIndexId in dataPointsWithIndexIdsToUpdate)
-            {
-                storage.Update(dataPointWithIndexId.DataPoint.Id, dataPointWithIndexId.DataPoint.Data);
-            }
+            foreach (var (dataPoint, _) in dataPointsWithIndexIdsToUpdate)
+                storage.Update(dataPoint.Id, dataPoint.Data);
 
-            foreach (var dataPointWithIndexId in dataPointsWithIndexIdsToAdd)
-            {
-                storage.Add(dataPointWithIndexId.DataPoint.Id, dataPointWithIndexId.DataPoint.Data);
-            }
+            foreach (var (dataPoint, _) in dataPointsWithIndexIdsToAdd)
+                storage.Add(dataPoint.Id, dataPoint.Data);
 
             log.Debug(
-                $"Adding batch of {dataPoints.Length}, after: " +
+                $"Adding batch of {dataPointOrTombstones.Length}, after: " +
                 $"index size = {index.VectorCount}, " +
                 $"id map size = {idMapping.Count}, " +
                 $"data size = {storage.Count}");
         }
 
-        public IReadOnlyList<IndexQueryResult<TId, TData, TVector>> FindNearest(IndexQueryDataPoint<TVector>[] queryDataPoints, int limitPerQuery)
+        public IReadOnlyList<IndexSearchResultItem<TId, TData, TVector>> FindNearest(TVector[] queryVectors, int limitPerQuery)
         {
             log.Debug("Starting search in index");
-            var queryVectors = queryDataPoints.Select(x => x.Vector).ToArray();
             var nearest = index.FindNearest(queryVectors, limitPerQuery);
             log.Debug("Finished search in index");
 
             var queryResults = nearest
                 .Select(
-                    x => x
-                        .Select(y => new {IndexId = y.Id, y.Distance, Id = idMapping.GetIdByIndexId(y.Id), y.Vector})
+                    tuples => tuples
                         .Select(
-                            y => new IndexFoundDataPoint<TId, TData, TVector>
+                            t =>
                             {
-                                Id = y.Id,
-                                Data = storage.Get(y.Id),
-                                Vector = y.Vector,
-                                Distance = y.Distance
+                                var id = idMapping.GetIdByIndexId(t.Id);
+                                return new IndexFoundDataPoint<TId, TData, TVector>(
+                                    Id: id,
+                                    Data: storage.Get(id),
+                                    Vector: t.Vector,
+                                    Distance: t.Distance
+                                );
                             })
                         .ToArray())
                 .Zip(
-                    queryDataPoints,
-                    (foundPoints, queryPoint) => new IndexQueryResult<TId, TData, TVector>
-                    {
-                        QueryDataPoint = queryPoint,
-                        Nearest = foundPoints
-                    })
+                    queryVectors,
+                    (foundPoints, queryVector) => new IndexSearchResultItem<TId, TData, TVector>(queryVector, foundPoints))
                 .ToArray();
 
             return queryResults;

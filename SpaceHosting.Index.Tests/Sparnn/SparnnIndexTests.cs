@@ -70,18 +70,18 @@ namespace SpaceHosting.Index.Tests.Sparnn
 
         private SparseVector RandomVector(bool binary, double density = 0.01)
         {
-            var columnIndices = new List<int>();
             var coordinates = new List<double>();
+            var coordinateIndices = new List<int>();
             for (var d = 0; d < VectorDimension; d++)
             {
                 if (!(random.NextDouble() < density))
                     continue;
 
-                columnIndices.Add(d);
+                coordinateIndices.Add(d);
                 coordinates.Add(binary ? 1.0 : random.NextDouble());
             }
 
-            return new SparseVector(VectorDimension, columnIndices.ToArray(), coordinates.ToArray());
+            return new SparseVector(VectorDimension, coordinates.ToArray(), coordinateIndices.ToArray());
         }
     }
 }

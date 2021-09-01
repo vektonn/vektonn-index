@@ -23,24 +23,22 @@ namespace SpaceHosting.Index.Benchmarks
         {
             var indexDataPoints = vectors
                 .Select(
-                    (v, i) => new IndexDataPoint<int, object, TVector>
-                    {
-                        Id = i,
-                        Vector = v,
-                        Data = metadata?[i],
-                        IsDeleted = false
-                    })
+                    (v, i) => new IndexDataPointOrTombstone<int, object, TVector>(
+                        new IndexDataPoint<int, object, TVector>(
+                            Id: i,
+                            Vector: v,
+                            Data: metadata?[i]))
+                )
                 .ToArray();
 
-            var vectorDimension = indexDataPoints.First().Vector.Dimension;
             var indexStore = new IndexStoreFactory<int, object>(log).Create<TVector>(
                 indexAlgorithm,
-                vectorDimension,
+                vectorDimension: vectors.First().Dimension,
                 withDataStorage: metadata != null,
                 idComparer: EqualityComparer<int>.Default);
 
             foreach (var batch in indexDataPoints.Batch(indexBatchSize, b => b.ToArray()))
-                indexStore.AddBatch(batch);
+                indexStore.UpdateIndex(batch);
 
             return indexStore;
         }

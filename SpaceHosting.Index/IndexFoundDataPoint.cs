@@ -1,9 +1,7 @@
 namespace SpaceHosting.Index
 {
-    public class IndexFoundDataPoint<TId, TData, TVector> : IndexDataPoint<TId, TData, TVector>
+    public record IndexFoundDataPoint<TId, TData, TVector>(TId Id, TData? Data, TVector Vector, double Distance)
+        : IndexDataPoint<TId, TData, TVector>(Id, Data, Vector)
         where TId : notnull
-        where TVector : IVector
-    {
-        public double Distance { get; set; }
-    }
+        where TVector : IVector;
 }

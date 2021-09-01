@@ -37,7 +37,7 @@ namespace SpaceHosting.Index.Benchmarks
 
         private SparseVector[] vectors = null!;
         private IIndexStore<int, object, SparseVector> indexStore = null!;
-        private IndexQueryDataPoint<SparseVector>[] queryDataPoints = null!;
+        private SparseVector[] queryVectors = null!;
 
         [GlobalSetup]
         public void GlobalSetup()
@@ -54,15 +54,13 @@ namespace SpaceHosting.Index.Benchmarks
         {
             var sampleVectors = vectors.RandomSubset(QueryVectorsCount, deterministicRandom).ToList();
             var sampleVectorsReordered = sampleVectors.Shuffle(deterministicRandom).ToList();
-            var vectorsToSearch = sampleVectors.Zip(sampleVectorsReordered).Select(t => MidPoint(t.First, t.Second)).ToArray();
-
-            queryDataPoints = vectorsToSearch.Select(x => new IndexQueryDataPoint<SparseVector> {Vector = x}).ToArray();
+            queryVectors = sampleVectors.Zip(sampleVectorsReordered).Select(t => MidPoint(t.First, t.Second)).ToArray();
         }
 
         [Benchmark]
         public void Search()
         {
-            var results = indexStore.FindNearest(queryDataPoints, limitPerQuery: K);
+            var results = indexStore.FindNearest(queryVectors, limitPerQuery: K);
 
             if (results.Count != QueryVectorsCount)
                 throw new InvalidOperationException("results.Count != QueryVectorsCount");
