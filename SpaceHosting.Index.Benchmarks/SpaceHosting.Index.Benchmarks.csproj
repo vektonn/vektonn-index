@@ -10,8 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.13.0" />
-    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.0" Condition="'$(OS)' == 'Windows_NT'" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.1" />
+    <PackageReference Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.1" Condition="'$(OS)' == 'Windows_NT'" />
     <PackageReference Include="protobuf-net" Version="3.0.101" />
   </ItemGroup>
 
