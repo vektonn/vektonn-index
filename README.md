@@ -35,30 +35,29 @@ var indexStore = indexStoreFactory.Create<DenseVector>(
 2. Build search space.
 ```
 var indexDataPoints = vectors
-    .Select((vector, index) => new IndexDataPoint<int, object, DenseVector>
-    {
-        Id = index,
-        Vector = vector,
-        Data = metadata?[index]
-    })
+    .Select((vector, index) => 
+        new IndexDataPointOrTombstone<int, object, DenseVector>(
+            new IndexDataPoint<int, object, DenseVector>(
+                Id: index,
+                Vector: vector,
+                Data: metadata?[index]
+            )
+        )
+    )
     .ToArray();
 
 const int indexBatchSize = 1000;
 foreach (var batch in indexDataPoints.Batch(indexBatchSize, b => b.ToArray()))
-    indexStore.AddBatch(batch);
+    indexStore.UpdateIndex(batch);
 ```
 
-3. Search for `k` nearest elements for each vector in `vectorsToSearch` array.
+3. Search for `k` nearest elements for each vector in `queryVectors` array.
 ```
-var queryDataPoints = vectorsToSearch
-    .Select(vector => new IndexQueryDataPoint<DenseVector> { Vector = vector })
-    .ToArray()
-
-var queryResults = indexStore.FindNearest(queryDataPoints, limitPerQuery: k);
+var queryResults = indexStore.FindNearest(queryVectors, limitPerQuery: k);
 
 foreach (var queryResult in queryResults)
 {
-    foreach (IndexFoundDataPoint<int, object, DenseVector> dp in queryResult.Nearest)
+    foreach (IndexFoundDataPoint<int, object, DenseVector> dp in queryResult.NearestDataPoints)
         Console.WriteLine($"Distance: {dp.Distance}, Vector: {dp.Vector}, Id: {dp.Id}, Metadata: {dp.Data}");
 }
 
