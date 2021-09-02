@@ -8,7 +8,9 @@ namespace SpaceHosting.Index
         where TVector : IVector
     {
         long Count { get; }
-        void AddBatch(IndexDataPoint<TId, TData, TVector>[] dataPoints);
-        IReadOnlyList<IndexQueryResult<TId, TData, TVector>> FindNearest(IndexQueryDataPoint<TVector>[] queryDataPoints, int limitPerQuery);
+
+        void UpdateIndex(IndexDataPointOrTombstone<TId, TData, TVector>[] dataPointOrTombstones);
+
+        IReadOnlyList<IndexSearchResultItem<TId, TData, TVector>> FindNearest(TVector[] queryVectors, int limitPerQuery);
     }
 }

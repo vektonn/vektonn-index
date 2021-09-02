@@ -5,24 +5,24 @@ namespace SpaceHosting.Index
 {
     public sealed class SparseVector : IVector
     {
-        public SparseVector(int dimension, int[] columnIndices, double[] coordinates)
+        public SparseVector(int dimension, double[] coordinates, int[] coordinateIndices)
         {
-            if (coordinates.Length != columnIndices.Length)
-                throw new ArgumentException("Can't create sparse vector. Column indices count does not matches values count");
+            if (coordinates.Length != coordinateIndices.Length)
+                throw new ArgumentException("Can't create sparse vector. Coordinate indices count does not match Coordinates count");
 
-            if (columnIndices.Any(i => i >= dimension))
-                throw new ArgumentException("Can't create sparse vector. Column index is more than vector dimension");
+            if (coordinateIndices.Any(i => i >= dimension))
+                throw new ArgumentException("Can't create sparse vector. Coordinate index is more than vector dimension");
 
-            if (columnIndices.Distinct().Count() != columnIndices.Length)
-                throw new ArgumentException("Can't create sparse vector. Column indices have duplicates");
+            if (coordinateIndices.Distinct().Count() != coordinateIndices.Length)
+                throw new ArgumentException("Can't create sparse vector. Coordinate indices have duplicates");
 
             Dimension = dimension;
-            ColumnIndices = columnIndices;
             Coordinates = coordinates;
+            CoordinateIndices = coordinateIndices;
         }
 
         public int Dimension { get; }
-        public int[] ColumnIndices { get; }
         public double[] Coordinates { get; }
+        public int[] CoordinateIndices { get; }
     }
 }

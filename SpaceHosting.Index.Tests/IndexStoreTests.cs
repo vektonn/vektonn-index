@@ -9,7 +9,7 @@ namespace SpaceHosting.Index.Tests
 {
     public class IndexStoreTests
     {
-        private const double singlePrecisionEpsilon = 1e-06;
+        private const double SinglePrecisionEpsilon = 1e-06;
 
         private readonly Random random = new Random();
 
@@ -30,16 +30,17 @@ namespace SpaceHosting.Index.Tests
         [Test]
         public void AddBatch()
         {
-            var dataPoints = new[]
+            var dataPointOrTombstones = new[]
             {
-                new IndexDataPoint<int, string, DenseVector> {Id = 11, Data = "data_11", IsDeleted = false, Vector = new DenseVector(GetRandomCoordinates())},
-                new IndexDataPoint<int, string, DenseVector> {Id = 12, Data = "data_12", IsDeleted = false, Vector = new DenseVector(GetRandomCoordinates())},
-                new IndexDataPoint<int, string, DenseVector> {Id = 21, Data = "data_21", IsDeleted = false, Vector = new DenseVector(GetRandomCoordinates())},
-                new IndexDataPoint<int, string, DenseVector> {Id = 22, Data = "data_22", IsDeleted = false, Vector = new DenseVector(GetRandomCoordinates())},
-                new IndexDataPoint<int, string, DenseVector> {Id = 31, Data = "data_31", IsDeleted = true, Vector = new DenseVector(GetRandomCoordinates())},
-                new IndexDataPoint<int, string, DenseVector> {Id = 32, Data = "data_32", IsDeleted = true, Vector = new DenseVector(GetRandomCoordinates())},
-                new IndexDataPoint<int, string, DenseVector> {Id = 41, Data = "data_41", IsDeleted = true, Vector = new DenseVector(GetRandomCoordinates())},
-                new IndexDataPoint<int, string, DenseVector> {Id = 42, Data = "data_42", IsDeleted = true, Vector = new DenseVector(GetRandomCoordinates())},
+                new IndexDataPointOrTombstone<int, string, DenseVector>(new IndexDataPoint<int, string, DenseVector>(Id: 11, Data: "data_11", Vector: new DenseVector(GetRandomCoordinates()))),
+                new IndexDataPointOrTombstone<int, string, DenseVector>(new IndexDataPoint<int, string, DenseVector>(Id: 12, Data: "data_12", Vector: new DenseVector(GetRandomCoordinates()))),
+                new IndexDataPointOrTombstone<int, string, DenseVector>(new IndexDataPoint<int, string, DenseVector>(Id: 21, Data: "data_21", Vector: new DenseVector(GetRandomCoordinates()))),
+                new IndexDataPointOrTombstone<int, string, DenseVector>(new IndexDataPoint<int, string, DenseVector>(Id: 22, Data: "data_22", Vector: new DenseVector(GetRandomCoordinates()))),
+
+                new IndexDataPointOrTombstone<int, string, DenseVector>(new IndexTombstone<int>(Id: 31)),
+                new IndexDataPointOrTombstone<int, string, DenseVector>(new IndexTombstone<int>(Id: 32)),
+                new IndexDataPointOrTombstone<int, string, DenseVector>(new IndexTombstone<int>(Id: 41)),
+                new IndexDataPointOrTombstone<int, string, DenseVector>(new IndexTombstone<int>(Id: 42)),
             };
 
             A.CallTo(() => idMapping.Count).Returns(4);
@@ -61,14 +62,14 @@ namespace SpaceHosting.Index.Tests
 
             var vectorsToAdd = new[]
             {
-                dataPoints[0].Vector,
-                dataPoints[1].Vector,
-                dataPoints[2].Vector,
-                dataPoints[3].Vector,
+                dataPointOrTombstones[0].DataPoint!.Vector,
+                dataPointOrTombstones[1].DataPoint!.Vector,
+                dataPointOrTombstones[2].DataPoint!.Vector,
+                dataPointOrTombstones[3].DataPoint!.Vector,
             };
 
             var indexStore = new IndexStore<int, string, DenseVector>(log, index, idMapping, storage, EqualityComparer<int>.Default);
-            indexStore.AddBatch(dataPoints);
+            indexStore.UpdateIndex(dataPointOrTombstones);
 
             A.CallTo(() => idMapping.Delete(31)).MustHaveHappenedOnceExactly();
             A.CallTo(() => idMapping.Delete(32)).MustHaveHappenedOnceExactly();
@@ -83,7 +84,7 @@ namespace SpaceHosting.Index.Tests
             var deleteBatchSequence = new long[] {1031, 1032, 1011, 1012};
             A.CallTo(() => index.DeleteBatch(A<long[]>.That.IsSameSequenceAs(deleteBatchSequence))).MustHaveHappenedOnceExactly();
 
-            var addBatchSequence = new (long Id, DenseVector Vector)[]
+            var addBatchSequence = new (long Id, DenseVector? Vector)[]
             {
                 (Id: 1011, Vector: vectorsToAdd[0]),
                 (Id: 1012, Vector: vectorsToAdd[1]),
@@ -96,20 +97,20 @@ namespace SpaceHosting.Index.Tests
         [Test]
         public void FindNearest_AttachVector()
         {
-            var dataPoint1 = new IndexQueryDataPoint<DenseVector> {Vector = new DenseVector(GetRandomCoordinates())};
-            var dataPoint2 = new IndexQueryDataPoint<DenseVector> {Vector = new DenseVector(GetRandomCoordinates())};
+            var queryVector1 = new DenseVector(GetRandomCoordinates());
+            var queryVector2 = new DenseVector(GetRandomCoordinates());
             var vector1Nearest1 = new DenseVector(GetRandomCoordinates());
             var vector1Nearest2 = new DenseVector(GetRandomCoordinates());
 
             var queryDataPoints = new[]
             {
-                dataPoint1,
-                dataPoint2,
+                queryVector1,
+                queryVector2,
             };
 
             A.CallTo(
                     () => index.FindNearest(
-                        A<DenseVector[]>.That.IsSameSequenceAs(dataPoint1.Vector, dataPoint2.Vector),
+                        A<DenseVector[]>.That.IsSameSequenceAs(queryVector1, queryVector2),
                         2))
                 .Returns(
                     new[]
@@ -134,23 +135,23 @@ namespace SpaceHosting.Index.Tests
                 () =>
                 {
                     Assert.AreEqual(2, foundQueryResults.Length);
-                    Assert.AreEqual(2, foundQueryResults[0].Nearest.Length);
-                    Assert.AreEqual(0, foundQueryResults[1].Nearest.Length);
+                    Assert.AreEqual(2, foundQueryResults[0].NearestDataPoints.Length);
+                    Assert.AreEqual(0, foundQueryResults[1].NearestDataPoints.Length);
 
-                    CollectionAssert.AreEqual(dataPoint1.Vector.Coordinates, foundQueryResults[0].QueryDataPoint.Vector.Coordinates);
-                    CollectionAssert.AreEqual(dataPoint2.Vector.Coordinates, foundQueryResults[1].QueryDataPoint.Vector.Coordinates);
+                    CollectionAssert.AreEqual(queryVector1.Coordinates, foundQueryResults[0].QueryVector.Coordinates);
+                    CollectionAssert.AreEqual(queryVector2.Coordinates, foundQueryResults[1].QueryVector.Coordinates);
 
-                    var firstQueryFirstFoundDataPoint = foundQueryResults[0].Nearest[0];
+                    var firstQueryFirstFoundDataPoint = foundQueryResults[0].NearestDataPoints[0];
                     Assert.AreEqual(11, firstQueryFirstFoundDataPoint.Id);
                     Assert.AreEqual("data_11", firstQueryFirstFoundDataPoint.Data);
-                    Assert.That(firstQueryFirstFoundDataPoint.Vector.Coordinates, Is.EqualTo(vector1Nearest1.Coordinates).AsCollection.Within(singlePrecisionEpsilon));
-                    Assert.AreEqual(0.11, firstQueryFirstFoundDataPoint.Distance, singlePrecisionEpsilon);
+                    Assert.That(firstQueryFirstFoundDataPoint.Vector.Coordinates, Is.EqualTo(vector1Nearest1.Coordinates).AsCollection.Within(SinglePrecisionEpsilon));
+                    Assert.AreEqual(0.11, firstQueryFirstFoundDataPoint.Distance, SinglePrecisionEpsilon);
 
-                    var firstQuerySecondFoundDataPoint = foundQueryResults[0].Nearest[1];
+                    var firstQuerySecondFoundDataPoint = foundQueryResults[0].NearestDataPoints[1];
                     Assert.AreEqual(12, firstQuerySecondFoundDataPoint.Id);
                     Assert.AreEqual("data_12", firstQuerySecondFoundDataPoint.Data);
-                    Assert.That(firstQuerySecondFoundDataPoint.Vector.Coordinates, Is.EqualTo(vector1Nearest2.Coordinates).AsCollection.Within(singlePrecisionEpsilon));
-                    Assert.AreEqual(0.12, firstQuerySecondFoundDataPoint.Distance, singlePrecisionEpsilon);
+                    Assert.That(firstQuerySecondFoundDataPoint.Vector.Coordinates, Is.EqualTo(vector1Nearest2.Coordinates).AsCollection.Within(SinglePrecisionEpsilon));
+                    Assert.AreEqual(0.12, firstQuerySecondFoundDataPoint.Distance, SinglePrecisionEpsilon);
                 });
         }
 

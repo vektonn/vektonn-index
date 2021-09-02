@@ -9,7 +9,7 @@ namespace SpaceHosting.Index
 
         public IndexDataStorage(IEqualityComparer<TId> idComparer)
         {
-            storage = new Dictionary<TId, TData?>(idComparer); // todo: test over 2GB
+            storage = new Dictionary<TId, TData?>(idComparer);
         }
 
         public int Count => storage.Count;

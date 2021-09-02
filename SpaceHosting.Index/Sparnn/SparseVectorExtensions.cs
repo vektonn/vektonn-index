@@ -17,7 +17,7 @@ namespace SpaceHosting.Index.Sparnn
             var vectorStorage = MathNetVectorStorage.OfValue(dimension, 0);
             vectorStorage.ValueCount = inputVector.Coordinates.Length;
             vectorStorage.Values = inputVector.Coordinates;
-            vectorStorage.Indices = inputVector.ColumnIndices;
+            vectorStorage.Indices = inputVector.CoordinateIndices;
 
             return new MathNetVector(vectorStorage);
         }
@@ -25,7 +25,7 @@ namespace SpaceHosting.Index.Sparnn
         public static SparseVector ToModelVector(this MathNetVector vector)
         {
             var vectorStorage = (MathNetVectorStorage)vector.Storage;
-            return new SparseVector(dimension: vector.Count, vectorStorage.Indices, vectorStorage.Values);
+            return new SparseVector(dimension: vector.Count, vectorStorage.Values, vectorStorage.Indices);
         }
     }
 }

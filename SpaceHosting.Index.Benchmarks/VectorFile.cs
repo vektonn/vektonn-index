@@ -25,7 +25,7 @@ namespace SpaceHosting.Index.Benchmarks
             var vectors = vectorsFileFormat switch
             {
                 VectorsFileFormat.DenseVectorArrayJson => ReadDenseVectorArrayFile(vectorsFileName).Select(VectorConversions.ToSparseVector).ToArray(),
-                VectorsFileFormat.SparseVectorArrayJson => ReadSparseVectorArrayFile(vectorsFileName).Select(v => new SparseVector(v.dimension, v.columnIndices, v.coordinates)).ToArray(),
+                VectorsFileFormat.SparseVectorArrayJson => ReadSparseVectorArrayFile(vectorsFileName).Select(v => new SparseVector(v.dimension, v.coordinates, v.coordinateIndices)).ToArray(),
                 VectorsFileFormat.PandasDataFrameCsv => ReadPandasDataFrameCsvFile(vectorsFileName).Select(VectorConversions.ToSparseVector).ToArray(),
                 VectorsFileFormat.PandasDataFrameJson => ReadPandasDataFrameJsonFile(vectorsFileName).Select(VectorConversions.ToSparseVector).ToArray(),
                 _ => throw new ArgumentException($"Invalid vectorsFileFormat: {vectorsFileFormat}")
@@ -75,8 +75,8 @@ namespace SpaceHosting.Index.Benchmarks
         private class SparseVectorDto
         {
             public int dimension { get; init; }
-            public int[] columnIndices { get; init; } = null!;
             public double[] coordinates { get; init; } = null!;
+            public int[] coordinateIndices { get; init; } = null!;
         }
     }
 }

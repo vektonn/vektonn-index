@@ -31,7 +31,7 @@ namespace SpaceHosting.Index.Benchmarks
                 j++;
             }
 
-            return new SparseVector(dimension, indices, coords);
+            return new SparseVector(dimension, coords, indices);
         }
     }
 }
