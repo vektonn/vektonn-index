@@ -33,7 +33,7 @@ jobs:
       run: dotnet build --configuration Release
 
     - name: Pack
-      run: dotnet pack --configuration Release --no-build --output ${{ env.NUGET_PACKAGES_DIR }} ./SpaceHosting.Index/SpaceHosting.Index.csproj
+      run: dotnet pack --configuration Release --no-build --output ${{ env.NUGET_PACKAGES_DIR }} ./Vektonn.Index/Vektonn.Index.csproj
 
     - name: Store nuget packages as artifacts
       uses: actions/upload-artifact@v2
@@ -47,7 +47,7 @@ jobs:
       run: |
         docker container run --rm \
             --volume $PWD/lib-faiss-native:/host \
-            ghcr.io/${{ github.repository_owner }}/space-hosting/faiss-lib:$FAISS_VERSION \
+            ghcr.io/${{ github.repository_owner }}/vektonn/faiss-lib:$FAISS_VERSION \
             bash -c 'cp /lib-faiss-native/* /host/'
 
         export LD_LIBRARY_PATH=$PWD/lib-faiss-native
@@ -59,8 +59,8 @@ jobs:
       with:
         name: approval-tests-failure-artifacts
         path: |
-          ./SpaceHosting.Index.Tests/**/*.approved.*
-          ./SpaceHosting.Index.Tests/**/*.received.*
+          ./Vektonn.Index.Tests/**/*.approved.*
+          ./Vektonn.Index.Tests/**/*.received.*
         if-no-files-found: ignore
         retention-days: 10
 

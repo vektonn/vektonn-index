@@ -1,6 +1,6 @@
 @echo off
 
-set ProjectName=SpaceHosting.Index
+set ProjectName=Vektonn.Index
 
 rem reset current directory to the location of this script
 pushd "%~dp0"

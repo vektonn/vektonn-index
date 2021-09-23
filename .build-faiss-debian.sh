@@ -7,7 +7,7 @@ if [ $# -lt 1 ]; then
 fi
 
 FAISS_VERSION=$1
-DOCKER_IMAGE_NAME=${2:-space-hosting/faiss-lib}
+DOCKER_IMAGE_NAME=${2:-vektonn/faiss-lib}
 DOCKER_IMAGE_NAME_AND_TAG=$DOCKER_IMAGE_NAME:$FAISS_VERSION
 
 echo "Building faiss-lib docker image: $DOCKER_IMAGE_NAME_AND_TAG"

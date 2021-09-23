@@ -1,13 +1,13 @@
-# SpaceHosting.Index
+# Vektonn.Index
 
-[![CI](https://github.com/kontur-model-ops/space-hosting-index/actions/workflows/ci.yml/badge.svg)](https://github.com/kontur-model-ops/space-hosting-index/actions/workflows/ci.yml)
-[![NuGet Status](https://img.shields.io/nuget/v/SpaceHosting.Index.svg)](https://www.nuget.org/packages/SpaceHosting.Index/)
+[![CI](https://github.com/vektonn/vektonn-index/actions/workflows/ci.yml/badge.svg)](https://github.com/vektonn/vektonn-index/actions/workflows/ci.yml)
+[![NuGet Status](https://img.shields.io/nuget/v/Vektonn.Index.svg)](https://www.nuget.org/packages/Vektonn.Index/)
 
-SpaceHosting.Index is a .NET library for finding nearest neighbors in vector space. Dense and sparse vectors are supported. For dense vectors we use [Faiss](https://github.com/facebookresearch/faiss) native library. For sparse vectors we have ported to C# [PySparNN](https://github.com/facebookresearch/pysparnn) library.
+Vektonn.Index is a .NET library for finding nearest neighbors in vector space. Dense and sparse vectors are supported. For dense vectors we use [Faiss](https://github.com/facebookresearch/faiss) native library. For sparse vectors we have ported to C# [PySparNN](https://github.com/facebookresearch/pysparnn) library.
 
-SpaceHosting.Index key features:
-* One can store arbitary metadata along with the corresponding vectors in SpaceHosting.Index. Thus, this metadata is returned along with the search results.
-* SpaceHosting.Index supports incremental insertion and removal of elements in the search space.
+Vektonn.Index key features:
+* One can store arbitary metadata along with the corresponding vectors in Vektonn.Index. Thus, this metadata is returned along with the search results.
+* Vektonn.Index supports incremental insertion and removal of elements in the search space.
 
 ## Supported index types (metrics)
 For dense vectors:

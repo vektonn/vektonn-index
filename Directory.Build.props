@@ -12,7 +12,7 @@
     <PackageDescription>A library for efficient similarity search of dense and sparse vectors</PackageDescription>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/kontur-model-ops/space-hosting-index</RepositoryUrl>
+    <RepositoryUrl>https://github.com/vektonn/vektonn-index</RepositoryUrl>
     <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
     <PackageReleaseNotes>$(RepositoryUrl)/blob/master/CHANGELOG.md</PackageReleaseNotes>
   </PropertyGroup>

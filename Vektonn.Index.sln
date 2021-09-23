@@ -1,0 +1,56 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vektonn.Index", "Vektonn.Index\Vektonn.Index.csproj", "{0BAFEF56-FEB4-4640-9788-79F9645ADC1F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vektonn.Index.Tests", "Vektonn.Index.Tests\Vektonn.Index.Tests.csproj", "{B0711E0B-A15F-4B36-BC8F-5A5E1127E40A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vektonn.Index.Benchmarks", "Vektonn.Index.Benchmarks\Vektonn.Index.Benchmarks.csproj", "{7A9464E5-6950-4DF9-9FBB-74CC05014297}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildScripts", "BuildScripts", "{244034F4-C886-49E6-9522-8F0E6F1720D1}"
+	ProjectSection(SolutionItems) = preProject
+		.build-faiss-debian.dockerfile = .build-faiss-debian.dockerfile
+		.build-faiss-debian.sh = .build-faiss-debian.sh
+		.rebuild-nuget-package.cmd = .rebuild-nuget-package.cmd
+		.run-all-tests.dockerfile = .run-all-tests.dockerfile
+		.run-all-tests.sh = .run-all-tests.sh
+		.run-unit-tests.cmd = .run-unit-tests.cmd
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHubWorkflows", "GitHubWorkflows", "{CECAB9DF-2F31-4797-A055-0C11F239F5DA}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\publish-faiss-lib-image.yml = .github\workflows\publish-faiss-lib-image.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0BAFEF56-FEB4-4640-9788-79F9645ADC1F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BAFEF56-FEB4-4640-9788-79F9645ADC1F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BAFEF56-FEB4-4640-9788-79F9645ADC1F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BAFEF56-FEB4-4640-9788-79F9645ADC1F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0711E0B-A15F-4B36-BC8F-5A5E1127E40A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0711E0B-A15F-4B36-BC8F-5A5E1127E40A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0711E0B-A15F-4B36-BC8F-5A5E1127E40A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0711E0B-A15F-4B36-BC8F-5A5E1127E40A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A9464E5-6950-4DF9-9FBB-74CC05014297}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A9464E5-6950-4DF9-9FBB-74CC05014297}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A9464E5-6950-4DF9-9FBB-74CC05014297}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A9464E5-6950-4DF9-9FBB-74CC05014297}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{CECAB9DF-2F31-4797-A055-0C11F239F5DA} = {244034F4-C886-49E6-9522-8F0E6F1720D1}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D47682B7-5169-4654-A103-8B70A82D9AA7}
+	EndGlobalSection
+EndGlobal
