@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.3.1 - 2021.09.24
+- Change project name from SpaceHosting to Vektonn.
+
 ## v0.2.2 - 2021.09.02
 - Add `AlgorithmTraits` describing various index features.
 - Fix `IndexDataPoint.Vector` nullability constraint.
