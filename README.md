@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/vektonn/vektonn-index/actions/workflows/ci.yml/badge.svg)](https://github.com/vektonn/vektonn-index/actions/workflows/ci.yml)
 [![NuGet Status](https://img.shields.io/nuget/v/Vektonn.Index.svg)](https://www.nuget.org/packages/Vektonn.Index/)
+[![license](https://img.shields.io/hexpm/l/plug.svg?color=green)](https://github.com/vektonn/vektonn-index/blob/master/LICENSE)
 
 Vektonn.Index is a .NET library for finding nearest neighbors in vector space. Dense and sparse vectors are supported. For dense vectors we use [Faiss](https://github.com/facebookresearch/faiss) native library. For sparse vectors we have ported to C# [PySparNN](https://github.com/facebookresearch/pysparnn) library.
 
