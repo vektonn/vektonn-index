@@ -10,6 +10,8 @@ namespace Vektonn.Index
         {
             {Algorithms.FaissIndexFlatIP, ListSortDirection.Descending},
             {Algorithms.FaissIndexFlatL2, ListSortDirection.Ascending},
+            {Algorithms.FaissIndexHnswFlatIP, ListSortDirection.Descending},
+            {Algorithms.FaissIndexHnswFlatL2, ListSortDirection.Ascending},
             {Algorithms.SparnnIndexCosine, ListSortDirection.Ascending},
             {Algorithms.SparnnIndexJaccardBinary, ListSortDirection.Ascending},
         };

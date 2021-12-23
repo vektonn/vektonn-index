@@ -13,7 +13,6 @@ namespace Vektonn.Index.Faiss
 
         public void Dispose()
         {
-            // todo: fix Faiss exports, IDSelector_free -> IDSelectorBatch_free
             FaissApi.faiss_IDSelector_free(Ptr);
         }
     }

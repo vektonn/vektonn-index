@@ -7,28 +7,28 @@ namespace Vektonn.Index.Faiss
 {
     internal class FaissIndex : IIndex<DenseVector>
     {
-        private readonly string buildSteps;
+        public readonly IntPtr IdMapPtr;
+        public readonly IntPtr IndexPtr;
+
+        private readonly string description;
         private readonly FaissMetricType metric;
         private readonly int vectorDimension;
 
-        private readonly IntPtr index;
-        private readonly IntPtr indexInternal;
-
-        public FaissIndex(string buildSteps, FaissMetricType metric, int vectorDimension)
+        public FaissIndex(string description, FaissMetricType metric, int vectorDimension)
         {
             if (vectorDimension <= 0)
                 throw new ArgumentException(nameof(vectorDimension));
 
-            this.buildSteps = buildSteps;
+            this.description = description;
             this.metric = metric;
             this.vectorDimension = vectorDimension;
 
-            FaissApi.faiss_index_factory(ref indexInternal, vectorDimension, buildSteps, metric).ThrowOnFaissError();
+            FaissApi.faiss_index_factory(ref IndexPtr, vectorDimension, description, metric).ThrowOnFaissError();
 
-            FaissApi.faiss_IndexIDMap2_new(ref index, indexInternal).ThrowOnFaissError();
+            FaissApi.faiss_IndexIDMap2_new(ref IdMapPtr, IndexPtr).ThrowOnFaissError();
         }
 
-        public string Description => $"FAISS index with VectorDimension: {vectorDimension}, BuildSteps: {buildSteps}, Metric: {metric}";
+        public string Description => $"FAISS index with VectorDimension: {vectorDimension}, Description: {description}, Metric: {metric}";
 
         public int VectorCount { get; private set; }
 
@@ -37,7 +37,7 @@ namespace Vektonn.Index.Faiss
             using var selector = new FaissIdSelectorBatch(ids);
 
             var nRemoved = new IntPtr();
-            FaissApi.faiss_Index_remove_ids(index, selector.Ptr, ref nRemoved).ThrowOnFaissError();
+            FaissApi.faiss_Index_remove_ids(IdMapPtr, selector.Ptr, ref nRemoved).ThrowOnFaissError();
 
             VectorCount -= ids.Length;
 
@@ -53,7 +53,7 @@ namespace Vektonn.Index.Faiss
             var vectors = data.SelectMany(dp => dp.Vector.Coordinates.Select(x => (float)x)).ToArray();
             var ids = data.Select(dp => dp.Id).ToArray();
 
-            FaissApi.faiss_Index_add_with_ids(index, data.Length, vectors, ids).ThrowOnFaissError();
+            FaissApi.faiss_Index_add_with_ids(IdMapPtr, data.Length, vectors, ids).ThrowOnFaissError();
 
             VectorCount += data.Length;
         }
@@ -81,8 +81,8 @@ namespace Vektonn.Index.Faiss
 
         public void Dispose()
         {
-            FaissApi.faiss_Index_free(indexInternal);
-            FaissApi.faiss_Index_free(index);
+            FaissApi.faiss_Index_free(IndexPtr);
+            FaissApi.faiss_Index_free(IdMapPtr);
         }
 
         private IEnumerable<(long Id, double Distance)[]> FindNearestBatch(double[][] queryVectors, int limitPerQuery)
@@ -95,7 +95,7 @@ namespace Vektonn.Index.Faiss
             // todo: non-32-bit floats in Faiss
             var faissQuery = queryVectors.SelectMany(q => q.Select(x => (float)x)).ToArray();
 
-            FaissApi.faiss_Index_search(index, queriesCount, faissQuery, limitPerQuery, foundDistances, foundIds).ThrowOnFaissError();
+            FaissApi.faiss_Index_search(IdMapPtr, queriesCount, faissQuery, limitPerQuery, foundDistances, foundIds).ThrowOnFaissError();
 
             return foundIds
                 .Zip(foundDistances, (id, distance) => (id, (double)distance))
@@ -106,7 +106,7 @@ namespace Vektonn.Index.Faiss
         private DenseVector GetVector(long id)
         {
             var vector = new float[vectorDimension]; // todo: non-32-bit floats in Faiss
-            FaissApi.faiss_Index_reconstruct(index, id, vector).ThrowOnFaissError();
+            FaissApi.faiss_Index_reconstruct(IdMapPtr, id, vector).ThrowOnFaissError();
             var coordinates = vector.Select(x => (double)x).ToArray();
             return new DenseVector(coordinates);
         }

@@ -24,14 +24,12 @@ namespace Vektonn.Index.Tests.Faiss
         private const int ExpectedDistinctVectorsCount = 10996;
         private const int ExpectedScatteredVectorsCount = 10979;
 
-        private readonly Random deterministicRandom = new(Seed: 0);
-
         [Test]
         public void SearchVectorsThemselves()
         {
             var vectors = ReadAllVectors();
 
-            using var index = NewFaissIndex(vectors);
+            using var index = NewFaissIndex(vectors, Algorithms.FaissIndexTypeFlat);
 
             foreach (var (_, vector) in vectors)
             {
@@ -47,7 +45,7 @@ namespace Vektonn.Index.Tests.Faiss
         {
             var scatteredVectors = GetScatteredVectors(ReadAllVectors());
 
-            using var index = NewFaissIndex(scatteredVectors);
+            using var index = NewFaissIndex(scatteredVectors, Algorithms.FaissIndexTypeFlat);
 
             foreach (var (scatteredVectorId, scatteredVector) in scatteredVectors)
             {
@@ -61,8 +59,21 @@ namespace Vektonn.Index.Tests.Faiss
         }
 
         [Test]
-        public void SearchSomeNonExistingVectors()
+        public void SearchSomeNonExistingVectors_Flat()
         {
+            SearchSomeNonExistingVectors(Algorithms.FaissIndexTypeFlat);
+        }
+
+        [Test]
+        public void SearchSomeNonExistingVectors_HnswFlat()
+        {
+            SearchSomeNonExistingVectors(Algorithms.FaissIndexTypeHnswFlat);
+        }
+
+        private static void SearchSomeNonExistingVectors(string faissIndexDescription)
+        {
+            var deterministicRandom = new Random(Seed: 0);
+
             var allVectors = ReadAllVectors();
 
             var sampleVectors = allVectors.RandomSubset(100, deterministicRandom).ToList();
@@ -70,7 +81,7 @@ namespace Vektonn.Index.Tests.Faiss
             var vectorsToSearch = sampleVectors.Zip(sampleVectorsReordered).Select(t => MidPoint(t.First.Vector, t.Second.Vector)).ToArray();
             vectorsToSearch.VerifyApprovalAsJson(nameof(vectorsToSearch));
 
-            using var index = NewFaissIndex(allVectors);
+            using var index = NewFaissIndex(allVectors, faissIndexDescription);
             var searchResults = index.FindNearest(vectorsToSearch, limitPerQuery: 3);
 
             searchResults.VerifyApprovalAsJson(nameof(searchResults));
@@ -117,10 +128,10 @@ namespace Vektonn.Index.Tests.Faiss
             return scatteredVectors;
         }
 
-        private static FaissIndex NewFaissIndex(IList<(long Id, DenseVector Vector)> vectors)
+        private static FaissIndex NewFaissIndex(IList<(long Id, DenseVector Vector)> vectors, string faissIndexDescription)
         {
             var vectorDimension = vectors.First().Vector.Dimension;
-            var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, vectorDimension);
+            var index = new FaissIndex(faissIndexDescription, FaissMetricType.METRIC_L2, vectorDimension);
 
             foreach (var batch in vectors.Batch(size: 1000, b => b.ToArray()))
                 index.AddBatch(batch);
