@@ -67,7 +67,7 @@ namespace Vektonn.Index.Tests.Faiss
         [Test]
         public void SearchSomeNonExistingVectors_HnswFlat()
         {
-            SearchSomeNonExistingVectors(Algorithms.FaissIndexTypeHnswFlat);
+            SearchSomeNonExistingVectors(faissIndexDescription: "HNSW16,Flat");
         }
 
         private static void SearchSomeNonExistingVectors(string faissIndexDescription)

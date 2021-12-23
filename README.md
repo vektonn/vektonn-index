@@ -10,10 +10,12 @@ Vektonn.Index key features:
 * One can store arbitary metadata along with the corresponding vectors in Vektonn.Index. Thus, this metadata is returned along with the search results.
 * Vektonn.Index supports incremental insertion and removal of elements in the search space.
 
-## Supported index types (metrics)
+## Supported index types and metrics
 For dense vectors:
-* `FaissIndex.Flat.L2` - squared Euclidean (L2) distance
+* `FaissIndex.Flat.L2` - exhaustive search with squared Euclidean (L2) distance.
 * `FaissIndex.Flat.IP` - this is typically used for maximum inner product search. This is not by itself cosine similarity, unless the vectors are normalized.
+* `FaissIndex.HnswFlat.L2` - approximate search with L2 metric. Uses Faiss implementation of HNSW index.
+* `FaissIndex.HnswFlat.IP` - approximate search with inner product metric. Uses Faiss implementation of HNSW index.
 
 For sparse vectors:
 * `SparnnIndex.Cosine` - Cosine Distance (i.e. `1 - cosine_similarity`)

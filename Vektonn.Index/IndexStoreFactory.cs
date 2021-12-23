@@ -11,12 +11,14 @@ namespace Vektonn.Index
     public class IndexStoreFactory<TId, TData> : IIndexStoreFactory<TId, TData>
         where TId : notnull
     {
+        private const string FaissHnswIndexDescription = "HNSW16,Flat";
+
         private readonly Dictionary<string, (string FaissIndexDescription, FaissMetricType)> faissSupportedAlgorithms = new()
         {
             {Algorithms.FaissIndexFlatL2, (Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2)},
             {Algorithms.FaissIndexFlatIP, (Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_INNER_PRODUCT)},
-            {Algorithms.FaissIndexHnswFlatL2, (Algorithms.FaissIndexTypeHnswFlat, FaissMetricType.METRIC_L2)},
-            {Algorithms.FaissIndexHnswFlatIP, (Algorithms.FaissIndexTypeHnswFlat, FaissMetricType.METRIC_INNER_PRODUCT)}
+            {Algorithms.FaissIndexHnswFlatL2, (FaissHnswIndexDescription, FaissMetricType.METRIC_L2)},
+            {Algorithms.FaissIndexHnswFlatIP, (FaissHnswIndexDescription, FaissMetricType.METRIC_INNER_PRODUCT)}
         };
 
         private readonly Dictionary<string, MatrixMetricSearchSpaceAlgorithm> sparnnSupportedAlgorithms = new()
@@ -68,7 +70,7 @@ namespace Vektonn.Index
 
             var faissIndex = new FaissIndex(t.FaissIndexDescription, t.Metric, vectorDimension);
 
-            if (t.FaissIndexDescription == Algorithms.FaissIndexTypeHnswFlat)
+            if (t.FaissIndexDescription == FaissHnswIndexDescription)
             {
                 using var pSpace = new FaissParameterSpace();
                 pSpace.SetIndexParameter(faissIndex, "efConstruction", 500);

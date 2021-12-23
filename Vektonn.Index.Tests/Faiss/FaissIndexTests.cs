@@ -18,7 +18,7 @@ namespace Vektonn.Index.Tests.Faiss
         [Test]
         public void Tune_HnswParameters()
         {
-            using var index = new FaissIndex(Algorithms.FaissIndexTypeHnswFlat, FaissMetricType.METRIC_L2, 42);
+            using var index = new FaissIndex(description: "HNSW16,Flat", FaissMetricType.METRIC_L2, 42);
             using var parameterSpace = new FaissParameterSpace();
 
             parameterSpace.GetIndexParameter(index, "efSearch").Should().Be(16);

@@ -5,7 +5,7 @@ namespace Vektonn.Index
     {
         public const string FaissIndex = "FaissIndex";
         public const string FaissIndexTypeFlat = "Flat";
-        public const string FaissIndexTypeHnswFlat = "HNSW16,Flat";
+        public const string FaissIndexTypeHnswFlat = "HnswFlat";
 
         public const string SparnnIndex = "SparnnIndex";
 
