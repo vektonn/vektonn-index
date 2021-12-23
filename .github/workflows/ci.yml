@@ -16,7 +16,7 @@ on:
     - '**.md'
 
 env:
-  FAISS_VERSION: 1.7.1
+  FAISS_VERSION: 1.7.2.1
   NUGET_PACKAGES_DIR: ./nuget-packages
 
 jobs:

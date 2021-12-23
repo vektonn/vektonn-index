@@ -7,14 +7,28 @@ namespace Vektonn.Index.Tests
 {
     public class IndexStoreFactoryTests
     {
+        private static readonly string[] FaissIndexAlgorithms =
+        {
+            Algorithms.FaissIndexFlatIP,
+            Algorithms.FaissIndexFlatL2,
+            Algorithms.FaissIndexHnswFlatIP,
+            Algorithms.FaissIndexHnswFlatL2,
+        };
+
+        private static readonly string[] SparnnIndexAlgorithms =
+        {
+            Algorithms.SparnnIndexCosine,
+            Algorithms.SparnnIndexJaccardBinary,
+        };
+
         private readonly IndexStoreFactory<int, string> indexStoreFactory = new(new SilentLog());
 
-        [Test]
         [Category("RequiresNativeFaissLibrary")]
-        public void Create_FaissIndex()
+        [TestCaseSource(nameof(FaissIndexAlgorithms))]
+        public void Create_FaissIndex(string algorithm)
         {
             var indexStore = indexStoreFactory.Create<DenseVector>(
-                Algorithms.FaissIndexFlatIP,
+                algorithm,
                 vectorDimension: 42,
                 withDataStorage: true,
                 EqualityComparer<int>.Default);
@@ -22,11 +36,11 @@ namespace Vektonn.Index.Tests
             indexStore.Should().BeOfType<IndexStore<int, string, DenseVector>>();
         }
 
-        [Test]
-        public void Create_SparnnIndex()
+        [TestCaseSource(nameof(SparnnIndexAlgorithms))]
+        public void Create_SparnnIndex(string algorithm)
         {
             var indexStore = indexStoreFactory.Create<SparseVector>(
-                Algorithms.SparnnIndexJaccardBinary,
+                algorithm,
                 vectorDimension: 42,
                 withDataStorage: false,
                 EqualityComparer<int>.Default);

@@ -1,7 +1,7 @@
 #!/bin/bash -e
 THIS_SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
-FAISS_VERSION=1.7.1
+FAISS_VERSION=1.7.2.1
 
 docker container run \
     --rm \

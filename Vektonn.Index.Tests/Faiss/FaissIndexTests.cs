@@ -16,6 +16,22 @@ namespace Vektonn.Index.Tests.Faiss
         private readonly Random random = new Random();
 
         [Test]
+        public void Tune_HnswParameters()
+        {
+            using var index = new FaissIndex(description: "HNSW16,Flat", FaissMetricType.METRIC_L2, 42);
+            using var parameterSpace = new FaissParameterSpace();
+
+            parameterSpace.GetIndexParameter(index, "efSearch").Should().Be(16);
+            parameterSpace.GetIndexParameter(index, "efConstruction").Should().Be(40);
+
+            parameterSpace.SetIndexParameter(index, "efSearch", 100);
+            parameterSpace.SetIndexParameter(index, "efConstruction", 500);
+
+            parameterSpace.GetIndexParameter(index, "efSearch").Should().Be(100);
+            parameterSpace.GetIndexParameter(index, "efConstruction").Should().Be(500);
+        }
+
+        [Test]
         [Repeat(1000)]
         public void FindNearest_AddRandomDataPointsAndSearch_FlatL2()
         {

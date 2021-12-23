@@ -11,10 +11,14 @@ namespace Vektonn.Index
     public class IndexStoreFactory<TId, TData> : IIndexStoreFactory<TId, TData>
         where TId : notnull
     {
-        private readonly Dictionary<string, (string, FaissMetricType)> faissSupportedAlgorithms = new()
+        private const string FaissHnswIndexDescription = "HNSW16,Flat";
+
+        private readonly Dictionary<string, (string FaissIndexDescription, FaissMetricType)> faissSupportedAlgorithms = new()
         {
             {Algorithms.FaissIndexFlatL2, (Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2)},
-            {Algorithms.FaissIndexFlatIP, (Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_INNER_PRODUCT)}
+            {Algorithms.FaissIndexFlatIP, (Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_INNER_PRODUCT)},
+            {Algorithms.FaissIndexHnswFlatL2, (FaissHnswIndexDescription, FaissMetricType.METRIC_L2)},
+            {Algorithms.FaissIndexHnswFlatIP, (FaissHnswIndexDescription, FaissMetricType.METRIC_INNER_PRODUCT)}
         };
 
         private readonly Dictionary<string, MatrixMetricSearchSpaceAlgorithm> sparnnSupportedAlgorithms = new()
@@ -61,10 +65,19 @@ namespace Vektonn.Index
 
         private IIndex<DenseVector> CreateDenseIndex(string algorithm, int vectorDimension)
         {
-            if (!faissSupportedAlgorithms.TryGetValue(algorithm, out (string BuildSteps, FaissMetricType Metric) t))
+            if (!faissSupportedAlgorithms.TryGetValue(algorithm, out (string FaissIndexDescription, FaissMetricType Metric) t))
                 throw new ArgumentException($"Invalid index algorithm: {algorithm}");
 
-            return new FaissIndex(t.BuildSteps, t.Metric, vectorDimension);
+            var faissIndex = new FaissIndex(t.FaissIndexDescription, t.Metric, vectorDimension);
+
+            if (t.FaissIndexDescription == FaissHnswIndexDescription)
+            {
+                using var pSpace = new FaissParameterSpace();
+                pSpace.SetIndexParameter(faissIndex, "efConstruction", 500);
+                pSpace.SetIndexParameter(faissIndex, "efSearch", 100);
+            }
+
+            return faissIndex;
         }
 
         private IIndex<SparseVector> CreateSparseIndex(string algorithm, int vectorDimension)

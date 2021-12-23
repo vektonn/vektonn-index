@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.4.1 - 2021.12.23
+- Add basic support for HNSW indices.
+
 ## v0.3.1 - 2021.09.24
 - Change project name from SpaceHosting to Vektonn.
 
