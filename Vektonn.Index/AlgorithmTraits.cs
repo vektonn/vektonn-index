@@ -1,21 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
+using Vektonn.Index.Faiss;
 
 namespace Vektonn.Index
 {
     public static class AlgorithmTraits
     {
-        private static readonly Dictionary<string, ListSortDirection> MergeSortDirectionsByAlgorithm = new()
-        {
-            {Algorithms.FaissIndexFlatIP, ListSortDirection.Descending},
-            {Algorithms.FaissIndexFlatL2, ListSortDirection.Ascending},
-            {Algorithms.FaissIndexHnswFlatIP, ListSortDirection.Descending},
-            {Algorithms.FaissIndexHnswFlatL2, ListSortDirection.Ascending},
-            {Algorithms.SparnnIndexCosine, ListSortDirection.Ascending},
-            {Algorithms.SparnnIndexJaccardBinary, ListSortDirection.Ascending},
-        };
-
         public static bool VectorsAreSparse(string indexAlgorithm)
         {
             if (indexAlgorithm.StartsWith(Algorithms.SparnnIndex))
@@ -29,10 +19,21 @@ namespace Vektonn.Index
 
         public static ListSortDirection GetMergeSortDirection(string indexAlgorithm)
         {
-            if (!MergeSortDirectionsByAlgorithm.TryGetValue(indexAlgorithm, out var mergeSortDirection))
-                throw new InvalidOperationException($"Invalid {nameof(indexAlgorithm)}: {indexAlgorithm}");
+            if (indexAlgorithm.StartsWith(Algorithms.SparnnIndex))
+                return ListSortDirection.Ascending;
 
-            return mergeSortDirection;
+            if (indexAlgorithm.StartsWith(Algorithms.FaissIndex))
+            {
+                var metricType = IndexParamsHelpers.TryGetFaissMetricType(indexAlgorithm);
+                return metricType switch
+                {
+                    FaissMetricType.METRIC_L2 => ListSortDirection.Ascending,
+                    FaissMetricType.METRIC_INNER_PRODUCT => ListSortDirection.Descending,
+                    _ => throw new InvalidOperationException($"Invalid {nameof(indexAlgorithm)}: {indexAlgorithm}")
+                };
+            }
+
+            throw new InvalidOperationException($"Invalid {nameof(indexAlgorithm)}: {indexAlgorithm}");
         }
     }
 }

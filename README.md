@@ -12,10 +12,13 @@ Vektonn.Index key features:
 
 ## Supported index types and metrics
 For dense vectors:
-* `FaissIndex.Flat.L2` - exhaustive search with squared Euclidean (L2) distance.
-* `FaissIndex.Flat.IP` - this is typically used for maximum inner product search. This is not by itself cosine similarity, unless the vectors are normalized.
-* `FaissIndex.HnswFlat.L2` - approximate search with L2 metric. Uses Faiss implementation of HNSW index.
-* `FaissIndex.HnswFlat.IP` - approximate search with inner product metric. Uses Faiss implementation of HNSW index.
+* `FaissIndex.L2` - squared Euclidean (L2) distance.
+* `FaissIndex.IP` - this is typically used for maximum inner product search. This is not by itself cosine similarity, unless the vectors are normalized.
+
+By default `FaissIndex`-es are constructed in `Flat` mode, i.e. they implement exhaustive (precise) search.
+To use Faiss implementation of [HNSW index](https://arxiv.org/abs/1603.09320) 
+provide `Hnsw_M`, `Hnsw_EfConstruction`, and `Hnsw_EfSearch` parameters 
+to `indexStoreFactory.Create<DenseVector>()` method through its optional `indexParams` parameter.
 
 For sparse vectors:
 * `SparnnIndex.Cosine` - Cosine Distance (i.e. `1 - cosine_similarity`)
@@ -29,7 +32,7 @@ Suppose we have an array of dense vectors (`DenseVector[] vectors`) and an array
 var indexStoreFactory = new IndexStoreFactory<int, object>(new SilentLog());
 
 var indexStore = indexStoreFactory.Create<DenseVector>(
-    Algorithms.FaissIndexFlatL2,
+    Algorithms.FaissIndexL2,
     vectorDimension,
     withDataStorage: true,
     idComparer: EqualityComparer<int>.Default);

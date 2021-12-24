@@ -7,28 +7,38 @@ namespace Vektonn.Index.Faiss
 {
     internal class FaissIndex : IIndex<DenseVector>
     {
-        public readonly IntPtr IdMapPtr;
         public readonly IntPtr IndexPtr;
-
-        private readonly string description;
-        private readonly FaissMetricType metric;
+        private readonly IntPtr idMapPtr;
         private readonly int vectorDimension;
 
-        public FaissIndex(string description, FaissMetricType metric, int vectorDimension)
+        public FaissIndex(int vectorDimension, FaissMetricType metric, HnswParams? hnswParams)
         {
             if (vectorDimension <= 0)
                 throw new ArgumentException(nameof(vectorDimension));
 
-            this.description = description;
-            this.metric = metric;
             this.vectorDimension = vectorDimension;
 
-            FaissApi.faiss_index_factory(ref IndexPtr, vectorDimension, description, metric).ThrowOnFaissError();
+            var indexType = hnswParams == null
+                ? "Flat"
+                : $"HNSW{hnswParams.M},Flat";
 
-            FaissApi.faiss_IndexIDMap2_new(ref IdMapPtr, IndexPtr).ThrowOnFaissError();
+            Description = $"FAISS index with VectorDimension: {vectorDimension}, Metric: {metric}, Type: {indexType}";
+
+            FaissApi.faiss_index_factory(ref IndexPtr, vectorDimension, indexType, metric).ThrowOnFaissError();
+
+            if (hnswParams != null)
+            {
+                using var pSpace = new FaissParameterSpace();
+                pSpace.SetIndexParameter(IndexPtr, "efConstruction", hnswParams.EfConstruction);
+                pSpace.SetIndexParameter(IndexPtr, "efSearch", hnswParams.EfSearch);
+
+                Description += $"(efConstruction={hnswParams.EfConstruction}, efSearch={hnswParams.EfSearch})";
+            }
+
+            FaissApi.faiss_IndexIDMap2_new(ref idMapPtr, IndexPtr).ThrowOnFaissError();
         }
 
-        public string Description => $"FAISS index with VectorDimension: {vectorDimension}, Description: {description}, Metric: {metric}";
+        public string Description { get; }
 
         public int VectorCount { get; private set; }
 
@@ -37,7 +47,7 @@ namespace Vektonn.Index.Faiss
             using var selector = new FaissIdSelectorBatch(ids);
 
             var nRemoved = new IntPtr();
-            FaissApi.faiss_Index_remove_ids(IdMapPtr, selector.Ptr, ref nRemoved).ThrowOnFaissError();
+            FaissApi.faiss_Index_remove_ids(idMapPtr, selector.Ptr, ref nRemoved).ThrowOnFaissError();
 
             VectorCount -= ids.Length;
 
@@ -53,7 +63,7 @@ namespace Vektonn.Index.Faiss
             var vectors = data.SelectMany(dp => dp.Vector.Coordinates.Select(x => (float)x)).ToArray();
             var ids = data.Select(dp => dp.Id).ToArray();
 
-            FaissApi.faiss_Index_add_with_ids(IdMapPtr, data.Length, vectors, ids).ThrowOnFaissError();
+            FaissApi.faiss_Index_add_with_ids(idMapPtr, data.Length, vectors, ids).ThrowOnFaissError();
 
             VectorCount += data.Length;
         }
@@ -82,7 +92,7 @@ namespace Vektonn.Index.Faiss
         public void Dispose()
         {
             FaissApi.faiss_Index_free(IndexPtr);
-            FaissApi.faiss_Index_free(IdMapPtr);
+            FaissApi.faiss_Index_free(idMapPtr);
         }
 
         private IEnumerable<(long Id, double Distance)[]> FindNearestBatch(double[][] queryVectors, int limitPerQuery)
@@ -95,7 +105,7 @@ namespace Vektonn.Index.Faiss
             // todo: non-32-bit floats in Faiss
             var faissQuery = queryVectors.SelectMany(q => q.Select(x => (float)x)).ToArray();
 
-            FaissApi.faiss_Index_search(IdMapPtr, queriesCount, faissQuery, limitPerQuery, foundDistances, foundIds).ThrowOnFaissError();
+            FaissApi.faiss_Index_search(idMapPtr, queriesCount, faissQuery, limitPerQuery, foundDistances, foundIds).ThrowOnFaissError();
 
             return foundIds
                 .Zip(foundDistances, (id, distance) => (id, (double)distance))
@@ -106,7 +116,7 @@ namespace Vektonn.Index.Faiss
         private DenseVector GetVector(long id)
         {
             var vector = new float[vectorDimension]; // todo: non-32-bit floats in Faiss
-            FaissApi.faiss_Index_reconstruct(IdMapPtr, id, vector).ThrowOnFaissError();
+            FaissApi.faiss_Index_reconstruct(idMapPtr, id, vector).ThrowOnFaissError();
             var coordinates = vector.Select(x => (double)x).ToArray();
             return new DenseVector(coordinates);
         }
