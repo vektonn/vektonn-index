@@ -9,7 +9,8 @@ namespace Vektonn.Index
             string algorithm,
             int vectorDimension,
             bool withDataStorage,
-            IEqualityComparer<TId> idComparer)
+            IEqualityComparer<TId> idComparer,
+            Dictionary<string, string>? indexParams = null)
             where TVector : IVector;
     }
 }

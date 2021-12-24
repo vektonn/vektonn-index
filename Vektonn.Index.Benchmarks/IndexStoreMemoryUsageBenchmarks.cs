@@ -70,7 +70,7 @@ namespace Vektonn.Index.Benchmarks
             for (var i = 0; i < SplitCount; i++)
             {
                 indexStores[i] = indexStoreFactory.Create<DenseVector>(
-                    Algorithms.FaissIndexFlatIP,
+                    Algorithms.FaissIndexIP,
                     VectorDimension,
                     withDataStorage: false,
                     idComparer);

@@ -11,14 +11,10 @@ namespace Vektonn.Index
     public class IndexStoreFactory<TId, TData> : IIndexStoreFactory<TId, TData>
         where TId : notnull
     {
-        private const string FaissHnswIndexDescription = "HNSW16,Flat";
-
-        private readonly Dictionary<string, (string FaissIndexDescription, FaissMetricType)> faissSupportedAlgorithms = new()
+        private readonly Dictionary<string, FaissMetricType> faissSupportedAlgorithms = new()
         {
-            {Algorithms.FaissIndexFlatL2, (Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2)},
-            {Algorithms.FaissIndexFlatIP, (Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_INNER_PRODUCT)},
-            {Algorithms.FaissIndexHnswFlatL2, (FaissHnswIndexDescription, FaissMetricType.METRIC_L2)},
-            {Algorithms.FaissIndexHnswFlatIP, (FaissHnswIndexDescription, FaissMetricType.METRIC_INNER_PRODUCT)}
+            {Algorithms.FaissIndexL2, FaissMetricType.METRIC_L2},
+            {Algorithms.FaissIndexIP, FaissMetricType.METRIC_INNER_PRODUCT},
         };
 
         private readonly Dictionary<string, MatrixMetricSearchSpaceAlgorithm> sparnnSupportedAlgorithms = new()
@@ -37,13 +33,18 @@ namespace Vektonn.Index
         }
 
         [SuppressMessage("ReSharper", "PatternAlwaysOfType")]
-        public IIndexStore<TId, TData, TVector> Create<TVector>(string algorithm, int vectorDimension, bool withDataStorage, IEqualityComparer<TId> idComparer)
+        public IIndexStore<TId, TData, TVector> Create<TVector>(
+            string algorithm,
+            int vectorDimension,
+            bool withDataStorage,
+            IEqualityComparer<TId> idComparer,
+            Dictionary<string, string>? indexParams = null)
             where TVector : IVector
         {
             var index = typeof(TVector) switch
             {
                 Type vectorType when vectorType == typeof(DenseVector) =>
-                    (IIndex<TVector>)CreateDenseIndex(algorithm, vectorDimension),
+                    (IIndex<TVector>)CreateDenseIndex(algorithm, vectorDimension, indexParams),
                 Type vectorType when vectorType == typeof(SparseVector) =>
                     (IIndex<TVector>)CreateSparseIndex(algorithm, vectorDimension),
                 _ =>
@@ -63,21 +64,14 @@ namespace Vektonn.Index
                 idComparer);
         }
 
-        private IIndex<DenseVector> CreateDenseIndex(string algorithm, int vectorDimension)
+        private IIndex<DenseVector> CreateDenseIndex(string algorithm, int vectorDimension, Dictionary<string, string>? indexParams)
         {
-            if (!faissSupportedAlgorithms.TryGetValue(algorithm, out (string FaissIndexDescription, FaissMetricType Metric) t))
+            if (!faissSupportedAlgorithms.TryGetValue(algorithm, out var metricType))
                 throw new ArgumentException($"Invalid index algorithm: {algorithm}");
 
-            var faissIndex = new FaissIndex(t.FaissIndexDescription, t.Metric, vectorDimension);
+            var hnswParams = IndexParamsHelpers.TryGetHnswParams(indexParams ?? new Dictionary<string, string>());
 
-            if (t.FaissIndexDescription == FaissHnswIndexDescription)
-            {
-                using var pSpace = new FaissParameterSpace();
-                pSpace.SetIndexParameter(faissIndex, "efConstruction", 500);
-                pSpace.SetIndexParameter(faissIndex, "efSearch", 100);
-            }
-
-            return faissIndex;
+            return new FaissIndex(vectorDimension, metricType, hnswParams);
         }
 
         private IIndex<SparseVector> CreateSparseIndex(string algorithm, int vectorDimension)

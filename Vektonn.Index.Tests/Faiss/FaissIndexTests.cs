@@ -18,24 +18,28 @@ namespace Vektonn.Index.Tests.Faiss
         [Test]
         public void Tune_HnswParameters()
         {
-            using var index = new FaissIndex(description: "HNSW16,Flat", FaissMetricType.METRIC_L2, 42);
+            using var index = new FaissIndex(
+                vectorDimension: 42,
+                FaissMetricType.METRIC_L2,
+                new HnswParams(M: 64, EfConstruction: 800, EfSearch: 200));
+
             using var parameterSpace = new FaissParameterSpace();
 
-            parameterSpace.GetIndexParameter(index, "efSearch").Should().Be(16);
-            parameterSpace.GetIndexParameter(index, "efConstruction").Should().Be(40);
+            parameterSpace.GetIndexParameter(index.IndexPtr, "efSearch").Should().Be(200);
+            parameterSpace.GetIndexParameter(index.IndexPtr, "efConstruction").Should().Be(800);
 
-            parameterSpace.SetIndexParameter(index, "efSearch", 100);
-            parameterSpace.SetIndexParameter(index, "efConstruction", 500);
+            parameterSpace.SetIndexParameter(index.IndexPtr, "efSearch", 100);
+            parameterSpace.SetIndexParameter(index.IndexPtr, "efConstruction", 500);
 
-            parameterSpace.GetIndexParameter(index, "efSearch").Should().Be(100);
-            parameterSpace.GetIndexParameter(index, "efConstruction").Should().Be(500);
+            parameterSpace.GetIndexParameter(index.IndexPtr, "efSearch").Should().Be(100);
+            parameterSpace.GetIndexParameter(index.IndexPtr, "efConstruction").Should().Be(500);
         }
 
         [Test]
         [Repeat(1000)]
         public void FindNearest_AddRandomDataPointsAndSearch_FlatL2()
         {
-            using var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, 2);
+            using var index = new FaissIndex(vectorDimension: 2, FaissMetricType.METRIC_L2, hnswParams: null);
 
             var firstIndexDataPoint = (Id: 1, Vector: RandomVector(2));
             var secondIndexDataPoint = (Id: 2, Vector: RandomVector(2));
@@ -67,7 +71,7 @@ namespace Vektonn.Index.Tests.Faiss
         [Test]
         public void FindNearest_AddStaticDataPoints_FlatL2()
         {
-            using var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, 2);
+            using var index = new FaissIndex(vectorDimension: 2, FaissMetricType.METRIC_L2, hnswParams: null);
 
             var firstIndexDataPoint = (Id: 1, Vector: Vector(1.0, 2.0));
             var secondIndexDataPoint = (Id: 2, Vector: Vector(10.0, 20.0));
@@ -94,7 +98,7 @@ namespace Vektonn.Index.Tests.Faiss
         [Test]
         public void FindNearest_AddAndDeleteStaticDataPointsAndSearch_FlatL2()
         {
-            using var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, 2);
+            using var index = new FaissIndex(vectorDimension: 2, FaissMetricType.METRIC_L2, hnswParams: null);
 
             var firstIndexDataPoint = (Id: 1, Vector: Vector(1.0, 2.0));
             var secondIndexDataPoint = (Id: 2, Vector: Vector(10.0, 20.0));
@@ -124,7 +128,7 @@ namespace Vektonn.Index.Tests.Faiss
         [Test]
         public void FindNearest_AddAndUpdateStaticDataPointsAndSearch_FlatL2()
         {
-            using var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, 2);
+            using var index = new FaissIndex(vectorDimension: 2, FaissMetricType.METRIC_L2, hnswParams: null);
 
             var firstIndexDataPoint = (Id: 1, Vector: Vector(1.0, 2.0));
             var secondIndexDataPoint = (Id: 2, Vector: Vector(10.0, 20.0));
@@ -165,7 +169,7 @@ namespace Vektonn.Index.Tests.Faiss
         [Test]
         public void FindNearest_InitEmptyDataPointsAndSearch_FlatL2()
         {
-            using var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, 2);
+            using var index = new FaissIndex(vectorDimension: 2, FaissMetricType.METRIC_L2, hnswParams: null);
 
             var foundDataPoints = index.FindNearest(new[] {Vector(5.0, 6.0)}, 2);
 
@@ -175,7 +179,7 @@ namespace Vektonn.Index.Tests.Faiss
         [Test]
         public void FindNearest_AddAndClearStaticDataPointsAndSearch_FlatL2()
         {
-            using var index = new FaissIndex(Algorithms.FaissIndexTypeFlat, FaissMetricType.METRIC_L2, 2);
+            using var index = new FaissIndex(vectorDimension: 2, FaissMetricType.METRIC_L2, hnswParams: null);
 
             var firstIndexDataPoint = (Id: 1, Vector: Vector(1.0, 2.0));
             var secondIndexDataPoint = (Id: 2, Vector: Vector(10.0, 20.0));

@@ -9,10 +9,8 @@ namespace Vektonn.Index.Tests
     {
         private static readonly string[] FaissIndexAlgorithms =
         {
-            Algorithms.FaissIndexFlatIP,
-            Algorithms.FaissIndexFlatL2,
-            Algorithms.FaissIndexHnswFlatIP,
-            Algorithms.FaissIndexHnswFlatL2,
+            Algorithms.FaissIndexIP,
+            Algorithms.FaissIndexL2,
         };
 
         private static readonly string[] SparnnIndexAlgorithms =
