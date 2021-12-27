@@ -67,7 +67,7 @@ namespace Vektonn.Index.Tests.Faiss
         [Test]
         public void SearchSomeNonExistingVectors_HnswFlat()
         {
-            SearchSomeNonExistingVectors(new HnswParams(M: 16, EfConstruction: 40, EfSearch: 16));
+            SearchSomeNonExistingVectors(new HnswParams(M: 16, EfConstruction: 200, EfSearch: 100));
         }
 
         private static void SearchSomeNonExistingVectors(HnswParams? hnswParams)
