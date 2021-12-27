@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.4.5 - 2021.12.28
+- Implement hyper parameters tuning for faiss indices.
+
 ## v0.4.1 - 2021.12.23
 - Add basic support for HNSW indices.
 
