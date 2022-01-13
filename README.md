@@ -1,3 +1,10 @@
+
+**Vektonn** is a high-performance battle-tested [kNN vector search](https://en.wikipedia.org/wiki/Nearest_neighbor_search#k-nearest_neighbors) engine for your data science applications. 
+It helps you manage vectors' lifecycle and radically reduces time to market.
+
+See [documentation](https://vektonn.github.io/vektonn/) for more info.
+
+
 # Vektonn.Index
 
 [![CI](https://github.com/vektonn/vektonn-index/actions/workflows/ci.yml/badge.svg)](https://github.com/vektonn/vektonn-index/actions/workflows/ci.yml)
