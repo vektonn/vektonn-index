@@ -52,7 +52,7 @@ namespace Vektonn.Index.Tests.Sparnn.Distances
         {
             double AccumulateNearestVectorResultDistance(SparnnIndex sparnnIndex)
             {
-                var searchResult = sparnnIndex.FindNearest(vectorsToSearch, kNearestCount);
+                var searchResult = sparnnIndex.FindNearest(vectorsToSearch, kNearestCount, retrieveVectors: true);
                 searchResult.Should().HaveCount(1);
                 return searchResult[0].Select(x => x.Distance).Sum();
             }

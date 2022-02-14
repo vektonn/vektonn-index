@@ -60,13 +60,13 @@ namespace Vektonn.Index.Sparnn
             return ids.Length;
         }
 
-        public IReadOnlyList<(long Id, double Distance, SparseVector Vector)[]> FindNearest(SparseVector[] queryVectors, int limitPerQuery)
+        public IReadOnlyList<IReadOnlyList<(long Id, double Distance, SparseVector? Vector)>> FindNearest(SparseVector[] queryVectors, int limitPerQuery, bool retrieveVectors)
         {
             if (queryVectors.Any(v => v.Dimension != vectorDimension))
                 throw new ArgumentException(nameof(vectorDimension));
 
             if (multiClusterIndex is null)
-                return queryVectors.Select(_ => Array.Empty<(long, double, SparseVector)>()).ToArray();
+                return queryVectors.Select(_ => Array.Empty<(long, double, SparseVector?)>()).ToArray();
 
             const int clusterToSearchNumber = 2; //number of branches (clusters) to search at each level.
             //This increases recall at the cost of some speed
@@ -74,7 +74,7 @@ namespace Vektonn.Index.Sparnn
             return multiClusterIndex.Search(queryVectors.ToIndexVectors(), limitPerQuery, clusterToSearchNumber, indicesNumber)
                 .Select(
                     vectorResults => vectorResults
-                        .Select(r => (r.Element, r.Distance, r.Vector.ToModelVector()))
+                        .Select(r => (r.Element, r.Distance, (SparseVector?)r.Vector.ToModelVector()))
                         .ToArray())
                 .ToArray();
         }

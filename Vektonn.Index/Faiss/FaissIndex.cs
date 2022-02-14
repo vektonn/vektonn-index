@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MoreLinq;
 
 namespace Vektonn.Index.Faiss
 {
@@ -68,25 +67,31 @@ namespace Vektonn.Index.Faiss
             VectorCount += data.Length;
         }
 
-        public IReadOnlyList<(long Id, double Distance, DenseVector Vector)[]> FindNearest(DenseVector[] queryVectors, int limitPerQuery)
+        public IReadOnlyList<IReadOnlyList<(long Id, double Distance, DenseVector? Vector)>> FindNearest(DenseVector[] queryVectors, int limitPerQuery, bool retrieveVectors)
         {
-            if (queryVectors.Any(v => v.Dimension != vectorDimension))
-                throw new ArgumentException(nameof(vectorDimension));
+            foreach (var queryVector in queryVectors)
+            {
+                if (queryVector.Dimension != vectorDimension)
+                    throw new InvalidOperationException($"queryVector.Dimension ({queryVector.Dimension}) != vectorDimension ({vectorDimension})");
+            }
 
-            const int maxBatchSize = 10;
-            return queryVectors
-                .Batch(maxBatchSize)
-                .SelectMany(x => FindNearestBatch(x.Select(y => y.Coordinates).ToArray(), limitPerQuery))
-                .Select(
-                    resultsForQueryVector => resultsForQueryVector
-                        .Select(
-                            result =>
-                                (result.Id,
-                                    result.Distance,
-                                    GetVector(result.Id))
-                        )
-                        .ToArray())
-                .ToArray();
+            var queriesCount = queryVectors.Length;
+
+            // todo: non-32-bit floats in Faiss
+            var faissQuery = new float[queriesCount * vectorDimension];
+            for (var queryIndex = 0; queryIndex < queriesCount; queryIndex++)
+            for (var i = 0; i < vectorDimension; i++)
+                faissQuery[queryIndex * vectorDimension + i] = (float)queryVectors[queryIndex].Coordinates[i];
+
+            var foundIds = new long[queriesCount * limitPerQuery];
+            var foundDistances = new float[queriesCount * limitPerQuery];
+            FaissApi.faiss_Index_search(idMapPtr, queriesCount, faissQuery, limitPerQuery, foundDistances, foundIds).ThrowOnFaissError();
+
+            var nearest = new IReadOnlyList<(long Id, double Distance, DenseVector? Vector)>[queriesCount];
+            for (var queryIndex = 0; queryIndex < queriesCount; queryIndex++)
+                nearest[queryIndex] = GetNearestForQuery(queryIndex, limitPerQuery, foundIds, foundDistances, retrieveVectors);
+
+            return nearest;
         }
 
         public void Dispose()
@@ -95,29 +100,34 @@ namespace Vektonn.Index.Faiss
             FaissApi.faiss_Index_free(idMapPtr);
         }
 
-        private IEnumerable<(long Id, double Distance)[]> FindNearestBatch(double[][] queryVectors, int limitPerQuery)
+        private IReadOnlyList<(long Id, double Distance, DenseVector? Vector)> GetNearestForQuery(int queryIndex, int limitPerQuery, long[] foundIds, float[] foundDistances, bool retrieveVectors)
         {
-            var queriesCount = queryVectors.Length;
+            var offsetInResults = queryIndex * limitPerQuery;
 
-            var foundIds = new long[queriesCount * limitPerQuery];
-            var foundDistances = new float[queriesCount * limitPerQuery];
+            var nearestForQuery = new List<(long Id, double Distance, DenseVector? Vector)>();
+            for (var i = 0; i < limitPerQuery; i++)
+            {
+                var id = foundIds[offsetInResults + i];
+                if (id == -1)
+                    break;
 
-            // todo: non-32-bit floats in Faiss
-            var faissQuery = queryVectors.SelectMany(q => q.Select(x => (float)x)).ToArray();
+                var distance = (double)foundDistances[offsetInResults + i];
+                var vector = retrieveVectors ? RetrieveVector(id) : null;
+                nearestForQuery.Add((id, distance, vector));
+            }
 
-            FaissApi.faiss_Index_search(idMapPtr, queriesCount, faissQuery, limitPerQuery, foundDistances, foundIds).ThrowOnFaissError();
-
-            return foundIds
-                .Zip(foundDistances, (id, distance) => (id, (double)distance))
-                .Batch(limitPerQuery)
-                .Select(x => x.Where(y => y.Item1 != -1).ToArray());
+            return nearestForQuery;
         }
 
-        private DenseVector GetVector(long id)
+        private DenseVector RetrieveVector(long id)
         {
             var vector = new float[vectorDimension]; // todo: non-32-bit floats in Faiss
             FaissApi.faiss_Index_reconstruct(idMapPtr, id, vector).ThrowOnFaissError();
-            var coordinates = vector.Select(x => (double)x).ToArray();
+
+            var coordinates = new double[vectorDimension];
+            for (var i = 0; i < vectorDimension; i++)
+                coordinates[i] = vector[i];
+
             return new DenseVector(coordinates);
         }
     }

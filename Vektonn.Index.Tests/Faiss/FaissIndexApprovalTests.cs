@@ -35,9 +35,9 @@ namespace Vektonn.Index.Tests.Faiss
 
             foreach (var (_, vector) in vectors)
             {
-                var nearest = index.FindNearest(new[] {vector}, limitPerQuery: 1).Single().Single();
+                var nearest = index.FindNearest(new[] {vector}, limitPerQuery: 1, retrieveVectors: true).Single().Single();
 
-                L2(nearest.Vector, vector).Should().BeApproximately(0.0, SinglePrecisionEpsilon);
+                L2(nearest.Vector!, vector).Should().BeApproximately(0.0, SinglePrecisionEpsilon);
                 nearest.Distance.Should().BeApproximately(0.0, SinglePrecisionEpsilon);
             }
         }
@@ -51,9 +51,9 @@ namespace Vektonn.Index.Tests.Faiss
 
             foreach (var (scatteredVectorId, scatteredVector) in scatteredVectors)
             {
-                var (nearestVectorId, distance, nearestVector) = index.FindNearest(new[] {scatteredVector}, limitPerQuery: 1).Single().Single();
+                var (nearestVectorId, distance, nearestVector) = index.FindNearest(new[] {scatteredVector}, limitPerQuery: 1, retrieveVectors: true).Single().Single();
 
-                L2(nearestVector, scatteredVector).Should().Be(0.0);
+                L2(nearestVector!, scatteredVector).Should().Be(0.0);
                 distance.Should().Be(0.0);
                 nearestVectorId.Should().Be(scatteredVectorId);
                 nearestVector.Should().BeEquivalentTo(scatteredVector);
@@ -84,7 +84,7 @@ namespace Vektonn.Index.Tests.Faiss
             vectorsToSearch.VerifyApprovalAsJson(nameof(vectorsToSearch));
 
             using var index = NewFaissIndex(allVectors, hnswParams);
-            var searchResults = index.FindNearest(vectorsToSearch, limitPerQuery: 3);
+            var searchResults = index.FindNearest(vectorsToSearch, limitPerQuery: 3, retrieveVectors: true);
 
             searchResults.VerifyApprovalAsJson(nameof(searchResults));
         }

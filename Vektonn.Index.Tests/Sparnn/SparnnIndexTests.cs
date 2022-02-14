@@ -55,9 +55,9 @@ namespace Vektonn.Index.Tests.Sparnn
 
             index.AddBatch(indexDataPoints);
 
-            var foundDataPoints = index.FindNearest(new[] {firstIndexDataPoint.Vector}, limitPerQuery: indexDataPoints.Length).Single();
+            var foundDataPoints = index.FindNearest(new[] {firstIndexDataPoint.Vector}, limitPerQuery: indexDataPoints.Length, retrieveVectors: true).Single();
 
-            foundDataPoints.Length.Should().Be(2);
+            foundDataPoints.Count.Should().Be(2);
 
             foundDataPoints[0].Id.Should().Be(1);
             foundDataPoints[0].Distance.Should().BeApproximately(0.0, SinglePrecisionEpsilon);

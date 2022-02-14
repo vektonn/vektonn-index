@@ -53,7 +53,7 @@ namespace Vektonn.Index.Tests.Faiss
 
             var queryDataPoints = indexDataPoints.Select(x => x.Vector).ToArray();
 
-            var foundDataPoints = index.FindNearest(queryDataPoints, 2);
+            var foundDataPoints = index.FindNearest(queryDataPoints, limitPerQuery: 2, retrieveVectors: true);
 
             var firstQueryFoundDataPoints = foundDataPoints[0];
             Assert.AreEqual(firstIndexDataPoint.Id, firstQueryFoundDataPoints[0].Id);
@@ -86,7 +86,7 @@ namespace Vektonn.Index.Tests.Faiss
             var queryDataPoint = Vector(2.0, 3.0);
             var queryDataPoints = new[] {queryDataPoint};
 
-            var foundDataPoints = index.FindNearest(queryDataPoints, 2);
+            var foundDataPoints = index.FindNearest(queryDataPoints, limitPerQuery: 2, retrieveVectors: true);
 
             var firstQueryFoundDataPoints = foundDataPoints[0];
             Assert.AreEqual(firstIndexDataPoint.Id, firstQueryFoundDataPoints[0].Id);
@@ -116,7 +116,7 @@ namespace Vektonn.Index.Tests.Faiss
             var queryDataPoint = Vector(2.0, 3.0);
             var queryDataPoints = new[] {queryDataPoint};
 
-            var foundDataPoints = index.FindNearest(queryDataPoints, 2);
+            var foundDataPoints = index.FindNearest(queryDataPoints, limitPerQuery: 2, retrieveVectors: true);
 
             var firstQueryFoundDataPoints = foundDataPoints[0];
             Assert.AreEqual(secondIndexDataPoint.Id, firstQueryFoundDataPoints[0].Id);
@@ -153,7 +153,7 @@ namespace Vektonn.Index.Tests.Faiss
             var queryDataPoint = Vector(2.0, 3.0);
             var queryDataPoints = new[] {queryDataPoint};
 
-            var foundDataPoints = index.FindNearest(queryDataPoints, 2);
+            var foundDataPoints = index.FindNearest(queryDataPoints, limitPerQuery: 2, retrieveVectors: true);
 
             var firstFoundDataPoint = foundDataPoints[0][0];
             firstFoundDataPoint.Id.Should().Be(firstIndexDataPointUpdate.Id);
@@ -171,7 +171,7 @@ namespace Vektonn.Index.Tests.Faiss
         {
             using var index = new FaissIndex(vectorDimension: 2, FaissMetricType.METRIC_L2, hnswParams: null);
 
-            var foundDataPoints = index.FindNearest(new[] {Vector(5.0, 6.0)}, 2);
+            var foundDataPoints = index.FindNearest(new[] {Vector(5.0, 6.0)}, limitPerQuery: 2, retrieveVectors: true);
 
             foundDataPoints[0].Should().BeEmpty();
         }
@@ -192,7 +192,7 @@ namespace Vektonn.Index.Tests.Faiss
             index.AddBatch(indexDataPoints);
             index.DeleteBatch(indexDataPoints.Select(x => x.Id).ToArray());
 
-            var foundDataPoints = index.FindNearest(new[] {Vector(5.0, 6.0)}, 2);
+            var foundDataPoints = index.FindNearest(new[] {Vector(5.0, 6.0)}, limitPerQuery: 2, retrieveVectors: true);
 
             foundDataPoints[0].Should().BeEmpty();
         }

@@ -117,11 +117,9 @@ namespace Vektonn.Index
                 $"data size = {storage.Count}");
         }
 
-        public IReadOnlyList<IndexSearchResultItem<TId, TData, TVector>> FindNearest(TVector[] queryVectors, int limitPerQuery)
+        public IReadOnlyList<IndexSearchResultItem<TId, TData, TVector>> FindNearest(TVector[] queryVectors, int limitPerQuery, bool retrieveVectors)
         {
-            log.Debug("Starting search in index");
-            var nearest = index.FindNearest(queryVectors, limitPerQuery);
-            log.Debug("Finished search in index");
+            var nearest = index.FindNearest(queryVectors, limitPerQuery, retrieveVectors);
 
             var queryResults = nearest
                 .Select(
