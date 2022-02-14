@@ -6,10 +6,12 @@ using System.Text.Json;
 using ApprovalTests.Reporters;
 using FluentAssertions;
 using MathNet.Numerics;
-using MoreLinq;
 using NUnit.Framework;
 using Vektonn.Index.Faiss;
 using Vektonn.Index.Tests.Helpers;
+using static MoreLinq.Extensions.BatchExtension;
+using static MoreLinq.Extensions.RandomSubsetExtension;
+using static MoreLinq.Extensions.ShuffleExtension;
 
 namespace Vektonn.Index.Tests.Faiss
 {
