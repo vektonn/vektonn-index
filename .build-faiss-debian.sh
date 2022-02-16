@@ -14,6 +14,14 @@ echo "Building faiss-lib docker image: $DOCKER_IMAGE_NAME_AND_TAG"
 
 docker image build \
     --pull \
+    --progress plain \
+    --tag vektonn/faiss-builder:latest \
+    --file "$THIS_SCRIPT_DIR/.build-faiss-debian-base.dockerfile" \
+    "$THIS_SCRIPT_DIR"
+
+docker image build \
+    --no-cache \
+    --progress plain \
     --build-arg "FAISS_VERSION=$FAISS_VERSION" \
     --tag "$DOCKER_IMAGE_NAME_AND_TAG" \
     --file "$THIS_SCRIPT_DIR/.build-faiss-debian.dockerfile" \
