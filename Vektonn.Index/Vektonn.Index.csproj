@@ -13,7 +13,7 @@
   <ItemGroup>
     <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
     <PackageReference Include="morelinq" Version="3.3.2" />
-    <PackageReference Include="Vostok.Logging.Abstractions" Version="1.0.29" />
+    <PackageReference Include="Vostok.Logging.Abstractions" Version="1.0.30" />
   </ItemGroup>
 
   <ItemGroup>
