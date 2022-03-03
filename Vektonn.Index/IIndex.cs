@@ -14,6 +14,6 @@ namespace Vektonn.Index
 
         long DeleteBatch(long[] ids);
 
-        IReadOnlyList<(long Id, double Distance, TVector Vector)[]> FindNearest(TVector[] queryVectors, int limitPerQuery);
+        IReadOnlyList<IReadOnlyList<(long Id, double Distance, TVector? Vector)>> FindNearest(TVector[] queryVectors, int limitPerQuery, bool retrieveVectors);
     }
 }

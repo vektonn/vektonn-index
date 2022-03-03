@@ -111,16 +111,17 @@ namespace Vektonn.Index.Tests
             A.CallTo(
                     () => index.FindNearest(
                         A<DenseVector[]>.That.IsSameSequenceAs(queryVector1, queryVector2),
-                        2))
+                        2,
+                        true))
                 .Returns(
                     new[]
                     {
-                        new (long Id, double Distance, DenseVector Vector)[]
+                        new (long Id, double Distance, DenseVector? Vector)[]
                         {
                             (Id: 1011, Distance: 0.11, vector1Nearest1),
                             (Id: 1012, Distance: 0.12, vector1Nearest2),
                         },
-                        Array.Empty<(long Id, double Distance, DenseVector Vector)>()
+                        Array.Empty<(long Id, double Distance, DenseVector? Vector)>()
                     });
 
             A.CallTo(() => idMapping.GetIdByIndexId(1011)).Returns(11);
@@ -129,7 +130,7 @@ namespace Vektonn.Index.Tests
             A.CallTo(() => storage.Get(12)).Returns("data_12");
 
             var indexStore = new IndexStore<int, string, DenseVector>(log, index, idMapping, storage, EqualityComparer<int>.Default);
-            var foundQueryResults = indexStore.FindNearest(queryDataPoints, 2).ToArray();
+            var foundQueryResults = indexStore.FindNearest(queryDataPoints, limitPerQuery: 2, retrieveVectors: true).ToArray();
 
             Assert.Multiple(
                 () =>
@@ -144,13 +145,13 @@ namespace Vektonn.Index.Tests
                     var firstQueryFirstFoundDataPoint = foundQueryResults[0].NearestDataPoints[0];
                     Assert.AreEqual(11, firstQueryFirstFoundDataPoint.Id);
                     Assert.AreEqual("data_11", firstQueryFirstFoundDataPoint.Data);
-                    Assert.That(firstQueryFirstFoundDataPoint.Vector.Coordinates, Is.EqualTo(vector1Nearest1.Coordinates).AsCollection.Within(SinglePrecisionEpsilon));
+                    Assert.That(firstQueryFirstFoundDataPoint.Vector!.Coordinates, Is.EqualTo(vector1Nearest1.Coordinates).AsCollection.Within(SinglePrecisionEpsilon));
                     Assert.AreEqual(0.11, firstQueryFirstFoundDataPoint.Distance, SinglePrecisionEpsilon);
 
                     var firstQuerySecondFoundDataPoint = foundQueryResults[0].NearestDataPoints[1];
                     Assert.AreEqual(12, firstQuerySecondFoundDataPoint.Id);
                     Assert.AreEqual("data_12", firstQuerySecondFoundDataPoint.Data);
-                    Assert.That(firstQuerySecondFoundDataPoint.Vector.Coordinates, Is.EqualTo(vector1Nearest2.Coordinates).AsCollection.Within(SinglePrecisionEpsilon));
+                    Assert.That(firstQuerySecondFoundDataPoint.Vector!.Coordinates, Is.EqualTo(vector1Nearest2.Coordinates).AsCollection.Within(SinglePrecisionEpsilon));
                     Assert.AreEqual(0.12, firstQuerySecondFoundDataPoint.Distance, SinglePrecisionEpsilon);
                 });
         }

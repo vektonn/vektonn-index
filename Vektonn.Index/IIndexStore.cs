@@ -11,6 +11,6 @@ namespace Vektonn.Index
 
         void UpdateIndex(IndexDataPointOrTombstone<TId, TData, TVector>[] dataPointOrTombstones);
 
-        IReadOnlyList<IndexSearchResultItem<TId, TData, TVector>> FindNearest(TVector[] queryVectors, int limitPerQuery);
+        IReadOnlyList<IndexSearchResultItem<TId, TData, TVector>> FindNearest(TVector[] queryVectors, int limitPerQuery, bool retrieveVectors);
     }
 }

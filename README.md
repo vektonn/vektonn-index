@@ -64,7 +64,7 @@ foreach (var batch in indexDataPoints.Batch(indexBatchSize, b => b.ToArray()))
 
 3. Search for `k` nearest elements for each vector in `queryVectors` array.
 ```
-var queryResults = indexStore.FindNearest(queryVectors, limitPerQuery: k);
+var queryResults = indexStore.FindNearest(queryVectors, limitPerQuery: k, retrieveVectors: true);
 
 foreach (var queryResult in queryResults)
 {

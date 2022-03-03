@@ -61,7 +61,7 @@ namespace Vektonn.Index.Benchmarks
         [Benchmark]
         public void Search()
         {
-            var results = indexStore.FindNearest(queryVectors, limitPerQuery: K);
+            var results = indexStore.FindNearest(queryVectors, limitPerQuery: K, retrieveVectors: true);
 
             if (results.Count != QueryVectorsCount)
                 throw new InvalidOperationException("results.Count != QueryVectorsCount");

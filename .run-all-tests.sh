@@ -1,7 +1,7 @@
 #!/bin/bash -e
 THIS_SCRIPT_DIR=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 
-FAISS_VERSION=1.7.2.1
+FAISS_VERSION=1.7.2.2
 
 docker container run \
     --rm \
@@ -11,6 +11,7 @@ docker container run \
 
 docker image build \
     --pull --no-cache \
+    --progress plain \
     --tag vektonn/index-tests:latest \
     --file "$THIS_SCRIPT_DIR/.run-all-tests.dockerfile" \
     "$THIS_SCRIPT_DIR"

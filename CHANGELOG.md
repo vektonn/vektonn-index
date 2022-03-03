@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.5.x - TBD
+- Target net6.0.
+- Introduce `retrieveVectors` parameter to speed things up when there is no need in nearest vectors themselves.
+
 ## v0.4.5 - 2021.12.28
 - Implement hyper parameters tuning for faiss indices.
 
