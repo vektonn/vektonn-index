@@ -3,7 +3,7 @@
 ## v0.7.1 - 2022.03.03
 - Target net6.0.
 - Introduce `retrieveVectors` parameter to speed things up when there is no need in nearest vectors themselves.
-- Link MKL to FAISS statically to fix FAISS usage when query batches are larger than 20 vectors.
+- Link Intel MKL to FAISS statically to fix FAISS usage when query batches are larger than 20 vectors.
 - Align versioning scheme with the main Vektonn repository.
 
 ## v0.4.5 - 2021.12.28
