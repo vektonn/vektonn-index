@@ -1,11 +1,13 @@
 # Changelog
 
-## v0.5.x - TBD
+## v0.7.1 - 2022.03.03
 - Target net6.0.
 - Introduce `retrieveVectors` parameter to speed things up when there is no need in nearest vectors themselves.
+- Link MKL to FAISS statically to fix FAISS usage when query batches are larger than 20 vectors.
+- Align versioning scheme with the main Vektonn repository.
 
 ## v0.4.5 - 2021.12.28
-- Implement hyper parameters tuning for faiss indices.
+- Implement hyper parameters tuning for FAISS indices.
 
 ## v0.4.1 - 2021.12.23
 - Add basic support for HNSW indices.
